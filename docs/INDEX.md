@@ -87,7 +87,7 @@ Responsibility:
 - Spec  
   `docs/modules/techspec_deterministic-rule-engine_v1.0.0-alpha.md`
 - Patterns / Regex Dictionary  
-  `dicts/deterministic-rule-engine/patterns_v1.0.0-alpha.yaml`
+  `dicts/deterministic-rule-engine/patterns_v1.0.0-alpha.json`
 - Code  
   `src/deterministic_rule_engine/engine_v1_0_0_alpha.py`
 
@@ -118,7 +118,7 @@ Responsibility:
 - Spec  
   `docs/modules/techspec_severity-mapper_v1.0.0-alpha.md`
 - Severity Mapping Dictionary  
-  `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
+  `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.json`
 - Code  
   `src/severity_mapper/mapper_v1_0_0_alpha.py`
 
@@ -165,7 +165,7 @@ No new risk_type may be added without updating this registry.
 All configurable rule components are defined separately from code.
 
 ### DeterministicRuleEngine Patterns
-- `dicts/deterministic-rule-engine/patterns_v1.0.0-alpha.yaml`
+- `dicts/deterministic-rule-engine/patterns_v1.0.0-alpha.json`
 
 Includes:
 - Intent keywords
@@ -174,7 +174,7 @@ Includes:
 - Strong/weak trigger classification
 
 ### Severity Mapping Rules
-- `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
+- `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.json`
 
 Includes:
 - risk_type → severity mapping
