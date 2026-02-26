@@ -101,3 +101,252 @@ Recommended input shape (implementation may wrap differently):
     "channel": "string (optional)"
   }
 }
+````
+
+**MUST**
+
+* Each image has a stable `source_page` starting from 1.
+* The scan is processed in `source_page` order.
+
+---
+
+## 6. System Output Contract
+
+### 6.1 Output (concept)
+
+Final output is a single JSON object assembled by GuardrailAggregator.
+
+Recommended system output shape:
+
+```json
+{
+  "system_version": "1.0.0-alpha",
+  "request_id": "string",
+  "artifacts": {
+    "block_extraction": {},
+    "deterministic_risks": {},
+    "semantic_risks": {},
+    "severity_mapping": {},
+    "guardrail_summary": {}
+  },
+  "final_risk_list": [],
+  "errors": []
+}
+```
+
+### 6.2 Required Module Metadata (MUST)
+
+Each module artifact MUST include:
+
+* `system_version`
+* `module_name` (one of the stable names)
+* `module_version`
+* `spec_version`
+* `dict_version` (only if that module depends on dict/config)
+* `schema_version` (the schema version used for validation)
+
+---
+
+## 7. Module Boundaries (MUST)
+
+### 7.1 BlockExtractor (LLM)
+
+**Does**
+
+* OCR-like extraction into `raw_text_lines`
+* Grouping into `blocks`
+* Provides normalized coordinates (as per module spec)
+
+**Does NOT**
+
+* Output risks
+* Output severity
+* Judge missing items
+* Correct or rewrite text
+
+### 7.2 DeterministicRuleEngine (Code)
+
+**Does**
+
+* Mandatory field presence checks (missing_*)
+* Format/pattern validation (format_*)
+* Relationship closure checks (relationship_*), including “weak trigger ambiguous” policy
+
+**Does NOT**
+
+* Semantic risk discovery
+* Severity assignment
+
+**Output requirement**
+
+* `detection_method` must be `"rule_guardrail"`
+
+**Dict dependency**
+
+* Uses JSON dictionaries for intents/regex/thresholds.
+
+### 7.3 SemanticRiskDetector (LLM)
+
+**Does**
+
+* High-recall semantic discovery (claims, contradictions within-image, ingredient boundary signals, etc.)
+* Must bind evidence to `block_id` and `raw_snippet`
+
+**Does NOT**
+
+* Missing checks
+* Format checks
+* Relationship checks
+* Severity assignment
+
+### 7.4 SeverityMapper (Code)
+
+**Does**
+
+* Deterministically map `risk_type` (+ optional sub-tags) to severity enum
+* Enforces “critical whitelist” policy (if adopted)
+
+**Does NOT**
+
+* Read image
+* Re-interpret text semantically
+
+**Dict dependency**
+
+* Uses a JSON mapping dictionary.
+
+### 7.5 GuardrailAggregator (Code)
+
+**Does**
+
+* Schema validation
+* Enum validation
+* Evidence binding validation
+* Fingerprint generation
+* Deduplication & merge
+* Assemble `final_risk_list`
+
+**Does NOT**
+
+* Discover new risks
+* Alter evidence snippets
+
+---
+
+## 8. Evidence Policy (MUST)
+
+### 8.1 Evidence Fields
+
+All risks must include:
+
+* `evidence.block_id`
+* `evidence.raw_snippet`
+
+### 8.2 Snippet Rules
+
+* For **missing_*** risks: `raw_snippet` must be `"N/A"`.
+* For all other risks: `raw_snippet` must be an **exact substring** from `blocks[].text_raw` (or directly from `raw_text_lines[].text`) with no rewriting.
+
+---
+
+## 9. Severity Policy (MUST)
+
+Severity enum:
+
+* `low | medium | high | critical`
+
+**MUST**
+
+* Severity is assigned only by SeverityMapper (deterministic).
+* LLM modules must not output severity.
+
+(If you adopt a “critical whitelist” policy, it must live in SeverityMapper dict/spec, not in prompts.)
+
+---
+
+## 10. Deduplication & Fingerprint Policy
+
+### 10.1 Dedup Key (recommended)
+
+GuardrailAggregator generates a stable fingerprint for each risk.
+
+Recommended fingerprint inputs:
+
+* `risk_type`
+* `detection_method`
+* `evidence.block_id`
+* normalized(`evidence.raw_snippet`)  *(missing uses "N/A")*
+
+Hash:
+
+* `sha256` over the concatenated canonical string
+
+### 10.2 Merge Rule (recommended)
+
+* If two risks share the same fingerprint → keep one.
+* If they share same `risk_type` + same snippet but different severity → keep the **higher** severity (should not happen if SeverityMapper is deterministic; treat as error if occurs).
+
+---
+
+## 11. Error Handling (MUST)
+
+### 11.1 Error Object
+
+System output `errors[]` should contain structured errors:
+
+* `error_code`
+* `module_name`
+* `message`
+* `severity` (info/warn/error)
+* `context` (optional)
+
+### 11.2 Failure Strategy (Alpha)
+
+* If BlockExtractor fails → abort (cannot proceed)
+* If DeterministicRuleEngine fails → proceed with semantic only, mark error
+* If SemanticRiskDetector fails → proceed with deterministic only, mark error
+* If SeverityMapper fails → abort final output (severity is required)
+* If GuardrailAggregator fails → abort final output
+
+---
+
+## 12. Versioning & Change Control
+
+### 12.1 SemVer
+
+* Breaking contract change → bump MAJOR
+* Backward-compatible addition → bump MINOR
+* Fix/typo/threshold adjustment → bump PATCH
+* Stage suffix used in Alpha: `-alpha` (and optional `.N`)
+
+### 12.2 Required Change Log
+
+All breaking changes require:
+
+* Schema update
+* Module spec update
+* `docs/changelog/changelog_v1.md` entry
+* Risk type registry update if applicable
+
+---
+
+## 13. Repository Artifacts & Naming (Normative)
+
+Canonical repository structure:
+
+* `docs/system/` system-level techspec
+* `docs/modules/` per-module techspec
+* `docs/registry/` risk type registry
+* `schemas/` JSON Schemas (Draft 2020-12)
+* `dicts/` JSON dictionaries (intents/regex/thresholds/mappings)
+* `prompts/` LLM prompts (versioned)
+* `src/` deterministic code modules (versioned)
+* `tests/` golden cases and unit tests
+
+> Dict format is JSON for all modules that use configurable patterns/mappings.
+
+---
+
+End of System TechSpec
+
+```
