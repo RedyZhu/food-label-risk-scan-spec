@@ -1,1 +1,243 @@
+# Deterministic Rule Engine - Patterns / Regex Dictionary
+# Version: v1.0.0-alpha
+# Schema Standard: JSON Schema Draft 2020-12
+#
+# Notes:
+# - All regex are for deterministic pattern matching only (shape detection), not authenticity verification.
+# - Normalization is for matching only; do NOT rewrite original text.
+# - Evidence snippets must be exact substrings from original extracted text.
 
+dict_name: DeterministicRuleEnginePatterns
+dict_version: v1.0.0-alpha
+module_name: DeterministicRuleEngine
+schema_standard: "json-schema-2020-12"
+
+matching:
+  # Used only for matching (not for output).
+  normalization:
+    fullwidth_to_halfwidth: true
+    collapse_whitespace: true
+    lowercase_for_match: true
+
+# ----------------------------
+# Intent keyword groups (for existence checks / context detection)
+# ----------------------------
+intents:
+  net_content_intent:
+    keywords:
+      - "净含量"
+      - "净重"
+      - "规格"
+      - "NET WT"
+      - "NET WEIGHT"
+      - "NET CONTENT"
+    # Some packages use "含量" but it's too broad; keep it out in alpha.
+
+  ingredient_intent:
+    keywords:
+      - "配料"
+      - "配料表"
+      - "INGREDIENTS"
+
+  nutrition_intent:
+    keywords:
+      - "营养成分表"
+      - "营养表"
+      - "NUTRITION FACTS"
+
+  standard_label_intent:
+    keywords:
+      - "执行标准"
+      - "产品标准"
+      - "标准代号"
+      - "标准号"
+      - "标准编号"
+
+  license_label_intent:
+    keywords:
+      - "食品生产许可证"
+      - "生产许可证"
+      - "许可证编号"
+      - "SC"
+      - "SC编号"
+      - "生产许可"
+
+  producer_intent:
+    keywords:
+      - "生产商"
+      - "生产者"
+      - "制造商"
+      - "厂名"
+      - "生产企业"
+      - "地址"
+      - "电话"
+      - "邮编"
+      - "联系方式"
+      - "经销商"
+      - "总经销"
+      - "进口商"
+      - "分装"
+
+  date_shelf_life_intent:
+    keywords:
+      - "生产日期"
+      - "生产日"
+      - "保质期"
+      - "有效期"
+      - "赏味期"
+      - "批号"
+      - "生产批号"
+
+  storage_intent:
+    keywords:
+      - "贮存"
+      - "贮藏"
+      - "储存"
+      - "保存方法"
+      - "存放于"
+      - "阴凉干燥"
+      - "冷藏"
+      - "冷冻"
+
+  # Entrust relationship intents (for relationship validation)
+  principal_party_intent:
+    keywords:
+      - "委托方"
+      - "委托单位"
+      - "委托商"
+
+  entrusted_party_strong_intent:
+    keywords:
+      - "受委托生产"
+      - "受委托生产企业"
+      - "委托生产"
+      - "委托加工"
+
+  entrusted_party_weak_intent:
+    keywords:
+      - "受托"
+      - "受委托"
+      - "被委托"
+      - "受托生产商"
+      - "受委托生产商"
+
+# ----------------------------
+# Regex patterns (shape recognition only)
+# ----------------------------
+regex:
+  # Net content value + unit, e.g., 100g, 1.5kg, 250mL, 330ML (case preserved in evidence)
+  net_content_value:
+    description: "Detect numeric value + mass/volume unit (shape only)"
+    flags: ["IGNORECASE"]
+    pattern: "\\b(\\d+(?:\\.\\d+)?)\\s*(mg|g|kg|ml|l|mL|L)\\b"
+
+  # Multi-pack spec: 10g×12 or 10g*12 or 10g x 12
+  net_content_multi:
+    description: "Detect value+unit multiplied by count (shape only)"
+    flags: ["IGNORECASE"]
+    pattern: "\\b(\\d+(?:\\.\\d+)?)\\s*(mg|g|kg|ml|l|mL|L)\\s*[x×\\*]\\s*(\\d+)\\b"
+
+  # Standard code shapes (no authenticity): GB, GB/T, Q/, NY/T, SB/T, T/
+  standard_code:
+    description: "Detect standard code-like token (shape only)"
+    flags: ["IGNORECASE"]
+    pattern: "\\b(GB\\/T|GB|Q\\/|NY\\/T|SB\\/T|T\\/)\\s*[A-Z]*\\d+[A-Z0-9.\\-]*\\b"
+
+  # Production license / SC code shape (no authenticity)
+  sc_code:
+    description: "Detect SC code-like token (shape only)"
+    flags: ["IGNORECASE"]
+    pattern: "\\bSC\\s*[0-9A-Z]{6,}\\b"
+
+  # Date shapes (optional support for existence checks)
+  date_ymd_numeric:
+    description: "Detect numeric date formats: YYYY-MM-DD / YYYY.MM.DD / YYYY/MM/DD"
+    flags: []
+    pattern: "\\b\\d{4}[.\\-/]\\d{1,2}[.\\-/]\\d{1,2}\\b"
+
+  date_ymd_cn:
+    description: "Detect Chinese date format: YYYY年MM月DD日"
+    flags: []
+    pattern: "\\b\\d{4}年\\d{1,2}月\\d{1,2}日\\b"
+
+  # Unit case detection for inconsistency checks (do NOT rewrite, only detect)
+  unit_ml_upper:
+    description: "Detect ML"
+    flags: []
+    pattern: "\\bML\\b"
+
+  unit_ml_mixed:
+    description: "Detect mL"
+    flags: []
+    pattern: "\\bmL\\b"
+
+  unit_ml_lower:
+    description: "Detect ml"
+    flags: []
+    pattern: "\\bml\\b"
+
+  unit_l_upper:
+    description: "Detect L"
+    flags: []
+    pattern: "\\bL\\b"
+
+  unit_l_lower:
+    description: "Detect l"
+    flags: []
+    pattern: "\\bl\\b"
+
+# ----------------------------
+# Thresholds / rule parameters
+# ----------------------------
+thresholds:
+  entrust_weak_trigger_max_count: 1
+  producer_context_keyword_min_hits_for_weak_entrust: 1
+
+# ----------------------------
+# Rule-to-pattern wiring helpers (optional; for engineers)
+# ----------------------------
+usage_hints:
+  existence_checks:
+    missing_net_content:
+      any_of:
+        - intent: net_content_intent
+        - regex: net_content_value
+        - regex: net_content_multi
+
+    missing_standard_code:
+      any_of:
+        - intent: standard_label_intent
+        - regex: standard_code
+
+    missing_production_license:
+      any_of:
+        - intent: license_label_intent
+        - regex: sc_code
+
+    missing_date_shelf_life:
+      any_of:
+        - intent: date_shelf_life_intent
+        - regex: date_ymd_numeric
+        - regex: date_ymd_cn
+
+  format_checks:
+    format_unit_case_inconsistent:
+      examples:
+        - "同一页或同一 block 同时命中 unit_ml_upper 与 unit_ml_mixed"
+        - "同一页或同一 block 同时命中 unit_l_upper 与 unit_l_lower"
+    format_net_content_pattern_unusual:
+      logic: "命中 net_content_intent 但未命中 net_content_value/net_content_multi"
+    format_standard_code_pattern_unusual:
+      logic: "命中 standard_label_intent 但未命中 standard_code"
+    format_license_code_pattern_unusual:
+      logic: "命中 license_label_intent 但未命中 sc_code"
+
+  relationship_checks:
+    incomplete_entrust_relationship:
+      logic: "命中 entrusted_party_strong_intent 且未命中 principal_party_intent"
+    entrusted_context_ambiguous:
+      logic: >
+        未命中 entrusted_party_strong_intent；
+        命中 entrusted_party_weak_intent 且出现次数 <= entrust_weak_trigger_max_count；
+        同 block 命中 producer_intent >= producer_context_keyword_min_hits_for_weak_entrust；
+        且未命中 principal_party_intent
