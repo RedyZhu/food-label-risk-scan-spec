@@ -40,6 +40,32 @@ Scan food label images (single or multiple pages) and produce:
 
 ## 3. Architecture Overview
 
+## Implementation Notes (Dify Integration) — Non-normative
+
+The current reference implementation uses **Dify** as the workflow/orchestration framework.
+This section documents integration notes only and does not change any normative contracts.
+
+### Module-to-Workflow Mapping (reference)
+- BlockExtractor: Dify LLM node
+- DeterministicRuleEngine: Dify Code node (deterministic execution)
+- SemanticRiskDetector: Dify LLM node
+- SeverityMapper: Dify Code node (deterministic mapping)
+- GuardrailAggregator: Dify Code node (validation + dedup + assembly)
+
+### Data Passing
+Artifacts are passed between nodes as JSON variables:
+- Block extraction artifact (raw_text_lines + blocks)
+- Deterministic risk list
+- Semantic risk list
+- Severity mapping artifact
+
+Dictionaries (intents/regex/thresholds, severity mapping) are injected as configuration constants.
+All evidence snippets must remain exact substrings of extracted raw text.
+
+### Portability
+System contracts, schemas, and module responsibilities are framework-agnostic.
+The workflow engine may be replaced in future versions without changing module naming or data contracts.
+
 ### 3.1 Modules (Responsibility Names — no “Layer” naming)
 - **BlockExtractor** (LLM)
 - **DeterministicRuleEngine** (Code)
