@@ -1,321 +1,103 @@
-# Food Label Risk Scan System
-
-System Technical Specification
-Version: v1.0.0-alpha
-Schema Standard: JSON Schema Draft 2020-12
-
----
-
-## 1. System Overview
-
-The Food Label Risk Scan System is a modular architecture designed to:
-
-* Extract structured textual blocks from food label images
-* Detect structural and semantic risk signals
-* Enforce deterministic guardrails
-* Produce reproducible, auditable risk outputs
-
-This system follows a **modular responsibility architecture**.
-Each module has a strictly defined boundary and must not override another module’s responsibility.
-
-This repository is the single source of truth.
-
-See also:
-`docs/system/terminology_v1.0.0-alpha.md`
+# Food Label Risk Scan System — System TechSpec
+**System Version:** v1.0.0-alpha  
+**Schema Standard:** JSON Schema Draft 2020-12  
+**Dictionary Format:** JSON  
+**Source of Truth:** This repository (GitHub)
 
 ---
 
-## 2. Architectural Principles
+## 1. Purpose & Scope (Alpha)
 
-### 2.1 Determinism First
+### 1.1 Goal
+Scan food label images (single or multiple pages) and produce:
+1) Replayable, reviewable text extraction and block structure  
+2) Deterministic structural/format/relationship findings (stable, reproducible)  
+3) High-recall semantic risk candidates (LLM; variance allowed)  
+4) Deterministic severity assignment (0 variance)  
+5) Guardrail validation + dedup + final output assembly
 
-All structural, format, and relationship validations must be handled by deterministic logic.
-
-LLM modules are reserved for:
-
-* Text extraction
-* Semantic interpretation
-* High-recall discovery
-
-Deterministic logic must never depend on probabilistic LLM reasoning.
-
----
-
-### 2.2 Single Source of Data Contracts
-
-All JSON structures must comply with schemas defined in:
-
-* `schemas/block.schema.json`
-* `schemas/risk-object.schema.json`
-* `schemas/system-output.schema.json`
-
-No module may redefine schema fields locally.
-
-Schema standard: JSON Schema Draft 2020-12.
+### 1.2 Alpha Non-Goals
+- No legal/compliance conclusion (no “compliant/illegal”)
+- No remediation guidance or operational instructions
+- No external authenticity verification (no database lookup, no lab-test assumption)
+- No bbox-level fine-grained OCR accuracy guarantee beyond best effort
+- No final “structured field extraction” beyond blocks (Stage Alpha)
 
 ---
 
-### 2.3 Closed Risk Registry
+## 2. Global Constraints (MUST)
 
-All `risk_type` values must be defined in:
-
-`docs/registry/risk_type_registry_v1.0.0-alpha.md`
-
-No undocumented risk_type may be emitted.
-
----
-
-## 3. Execution Order (Current Architecture)
-
-1. BlockExtractor
-2. DeterministicRuleEngine
-3. SemanticRiskDetector
-4. SeverityMapper
-5. GuardrailAggregator
-
-Execution order may evolve in future versions,
-but module names remain stable.
+1) **No legal conclusion**: never output “违法/合规/违规” as a conclusion.
+2) **No remediation**: never provide “how to fix” instructions.
+3) **Evidence fidelity**: any evidence snippet MUST be an exact substring from extracted raw text (except missing-type rules which use `"N/A"`).
+4) **No hallucinated text**: no words that do not exist in the image extraction.
+5) **Separation of concerns**:
+   - LLM modules do not assign severity.
+   - Deterministic modules do not perform semantic risk discovery.
+6) **Versioned outputs**: each module output MUST include required version metadata.
 
 ---
 
-## 4. Module Responsibilities
+## 3. Architecture Overview
 
-### 4.1 BlockExtractor (LLM)
+### 3.1 Modules (Responsibility Names — no “Layer” naming)
+- **BlockExtractor** (LLM)
+- **DeterministicRuleEngine** (Code)
+- **SemanticRiskDetector** (LLM)
+- **SeverityMapper** (Code)
+- **GuardrailAggregator** (Code)
 
-Input:
+### 3.2 Execution Order (current v1.0.0-alpha)
+1) BlockExtractor  
+2) DeterministicRuleEngine  
+3) SemanticRiskDetector  
+4) SeverityMapper  
+5) GuardrailAggregator
 
-* Food label images
-
-Output:
-
-* raw_text_lines
-* structured blocks
-
-Responsibilities:
-
-* OCR-based text recognition
-* Block grouping
-* Structured JSON output
-
-Must NOT:
-
-* Detect risks
-* Assign severity
-* Perform compliance judgments
+> Execution order may change in future versions. Module names remain stable.
 
 ---
 
-### 4.2 DeterministicRuleEngine (Code)
+## 4. Data Contracts (System-Level)
 
-Input:
+### 4.1 Global Object Model (high-level)
+- **BlockExtractionArtifact**: raw_text_lines + blocks
+- **DeterministicRiskListArtifact**: deterministic findings
+- **SemanticRiskListArtifact**: semantic findings (no severity)
+- **SeverityMappingArtifact**: risk_type → severity results
+- **FinalOutputArtifact**: validated, deduplicated final_risk_list
 
-* BlockExtractor output
+### 4.2 Central Schemas
+All schema definitions are centralized in `schemas/`:
+- `schemas/block.schema.json`
+- `schemas/risk-object.schema.json`
+- `schemas/system-output.schema.json`
 
-Responsibilities:
-
-* Mandatory field existence checks
-* Format validation (regex-based)
-* Structural relationship validation
-* Deterministic rule execution
-
-Output:
-
-* Risk objects
-* detection_method = "rule_guardrail"
-
-Must:
-
-* Use YAML dictionary configuration
-* Use regex for pattern validation
-* Not rely on LLM reasoning
-
-Dictionary source:
-`dicts/deterministic-rule-engine/patterns_v1.0.0-alpha.yaml`
-
----
-
-### 4.3 SemanticRiskDetector (LLM)
-
-Input:
-
-* Image
-* Structured blocks
-
-Responsibilities:
-
-* Semantic claim detection
-* Contradiction detection (within image only)
-* High-recall risk identification
-
-Must NOT:
-
-* Assign severity
-* Perform deterministic field checks
-* Override DeterministicRuleEngine results
-
----
-
-### 4.4 SeverityMapper (Code)
-
-Input:
-
-* risk_type
-* detection_method
-
-Responsibilities:
-
-* Map risk_type → severity
-* Enforce severity constraints
-* Ensure closed severity enumeration
-
-Severity mapping dictionary:
-`dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
-
-Severity Enum:
-
-* low
-* medium
-* high
-* critical
-
----
-
-### 4.5 GuardrailAggregator (Code)
-
-Responsibilities:
-
-* Schema validation (Draft 2020-12 compliant)
-* Risk deduplication
-* Fingerprint generation
-* Final risk list assembly
-* Output normalization
-
-Must:
-
-* Reject schema violations
-* Reject unknown risk_type
-* Reject invalid severity values
+Schema versioning:
+- Each schema file MUST declare `$schema` = Draft 2020-12
+- Each schema MUST carry a `schema_version` field (string) or embed it via `$id`
 
 ---
 
 ## 5. System Input Contract
 
-Defined in:
+### 5.1 System Input (concept)
+The system accepts one or more images, in order.
 
-`schemas/system-output.schema.json` (input section)
-
-Minimal logical structure:
-
-* system_version: string
-* request_id: string
-* images: array
-
-  * source_page: integer
-  * image_url: string (optional)
-  * image_base64: string (optional)
-
----
-
-## 6. System Output Contract
-
-Final output must comply with:
-
-`schemas/system-output.schema.json`
-
-Core output sections:
-
-* block_extraction
-* deterministic_risks
-* semantic_risks
-* severity_mapping
-* final_risk_list
-
-Each risk object must comply with:
-
-`schemas/risk-object.schema.json`
-
----
-
-## 7. Versioning Policy
-
-System version: v1.0.0-alpha
-
-Each module must include:
-
-* module_name
-* module_version
-* spec_version
-* dict_version (if applicable)
-
-Breaking change rules:
-
-| Change Type         | Required Action              |
-| ------------------- | ---------------------------- |
-| Schema change       | MAJOR version bump           |
-| New risk_type       | Registry update + MINOR bump |
-| Regex change        | dict_version bump            |
-| Prompt modification | module_version bump          |
-
----
-
-## 8. Deterministic Rule Policy
-
-All pattern validation must:
-
-* Use YAML-based configuration
-* Use regex for:
-
-  * Standard codes
-  * License numbers
-  * Net content formats
-  * Date formats
-* Avoid heuristic guessing
-
-Weak/Strong trigger logic must be explicitly defined in dictionary configuration.
-
----
-
-## 9. Governance Constraints
-
-The system must never:
-
-* Output legal conclusions
-* Use the terms “compliant” or “illegal”
-* Provide remediation instructions
-* Perform external authenticity verification (Alpha scope)
-
-All logic must be reproducible.
-
----
-
-## 10. Audit & Reproducibility
-
-Each system execution must be reproducible using:
-
-* system_version
-* module versions
-* dict_version
-* prompt version
-* input images
-
-Deterministic modules must produce identical output given identical input.
-
-LLM modules may vary but must bind evidence to original text snippets.
-
----
-
-## 11. Future Extension Areas (Non-Binding)
-
-* Multi-model voting
-* OCR confidence arbitration
-* Cross-page contradiction detection
-* Risk confidence scoring
-* Statistical calibration layer
-
-These are not included in v1.0.0-alpha.
-
----
-
-End of System Technical Specification
-
----
+Recommended input shape (implementation may wrap differently):
+```json
+{
+  "system_version": "1.0.0-alpha",
+  "request_id": "string",
+  "images": [
+    {
+      "source_page": 1,
+      "image_url": "string (optional)",
+      "image_base64": "string (optional)"
+    }
+  ],
+  "metadata": {
+    "product_id": "string (optional)",
+    "channel": "string (optional)"
+  }
+}
