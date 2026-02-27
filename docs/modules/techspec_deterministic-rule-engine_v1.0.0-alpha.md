@@ -226,3 +226,23 @@ Breaking changes require version bump and synchronized update of:
 
 中文说明：
 - 发生破坏性变更时，必须同步更新规范、字典、下游预期，避免联调偏差。
+
+---
+
+## 11. Dify Patterns Node Baseline / Dify 字典节点基线
+
+Reference node config:
+
+- `dicts/deterministic-rule-engine/dify_node_config_v1.0.0-alpha.json`
+
+Baseline (current):
+
+- node_name: `DRE Patterns Dictionary`
+- node_type: `Code`
+- input_params: none
+- output_mode: default
+- output_key: `result`
+
+中文说明：
+- 该节点仅负责输出规则字典，不依赖上游业务输入参数。
+- 输出采用 Dify 默认参数，并将字典对象传递给 DeterministicRuleEngine 节点。

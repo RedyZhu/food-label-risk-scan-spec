@@ -1,0 +1,35 @@
+{
+  "node_name": "DRE Patterns Dictionary",
+  "node_type": "Code",
+  "runtime": "dify",
+  "input_params": [],
+  "output_mode": "default",
+  "output_key": "result",
+  "code_returns": {
+    "dict_version": "v1.0.0-alpha",
+    "intents": {
+      "net_content_intent": ["净含量", "净重", "规格", "net wt", "net weight", "net content"],
+      "ingredient_intent": ["配料", "配料表", "ingredients"],
+      "producer_intent": ["生产商", "生产者", "制造商", "地址", "电话", "有限公司", "邮编", "经销商", "进口商", "分装"],
+      "date_shelf_life_intent": ["生产日期", "保质期", "有效期", "赏味期", "批号"],
+      "standard_code_intent": ["执行标准", "标准代号", "标准号", "标准编号", "产品标准"],
+      "license_intent": ["食品生产许可证", "生产许可证", "SC", "许可证编号"],
+      "principal_party_intent": ["委托方", "委托单位", "委托商"],
+      "entrusted_party_strong_intent": ["受委托生产", "受委托生产企业", "委托生产", "委托加工"],
+      "entrusted_party_weak_intent": ["受托", "受委托", "被委托", "受托生产商", "受委托生产商"],
+      "producer_context_terms_for_entrust_weak": ["生产商", "生产者", "制造商", "地址", "电话", "有限公司"]
+    },
+    "regex": {
+      "standard_code": ["(?i)\\b(GB\\/T|GB|Q\\/|NY\\/T|SB\\/T|T\\/)\\s*[A-Z]*\\d+[A-Z0-9.-]*\\b"],
+      "sc_code": ["(?i)\\bSC\\s*[0-9A-Z]{6,}\\b"]
+    },
+    "thresholds": {
+      "entrust_weak_trigger_max_count": 1
+    }
+  },
+  "notes": [
+    "No input parameters.",
+    "Uses Dify default output parameters.",
+    "Payload aligns with dicts/deterministic-rule-engine/patterns_v1.0.0-alpha.json."
+  ]
+}
