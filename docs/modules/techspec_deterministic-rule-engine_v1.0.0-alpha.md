@@ -241,8 +241,10 @@ Baseline (current):
 - node_type: `Code`
 - input_params: none
 - output_mode: default
-- output_key: `result`
+- output_key: `output`
+- output_type: `string` (Dify transformed content)
 
 中文说明：
 - 该节点仅负责输出规则字典，不依赖上游业务输入参数。
-- 输出采用 Dify 默认参数，并将字典对象传递给 DeterministicRuleEngine 节点。
+- Dify Code 节点默认输出变量通常为 `output`（字符串）。
+- 下游 DeterministicRuleEngine 节点需按 JSON 解析后再作为 patterns 配置使用。
