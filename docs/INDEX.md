@@ -74,6 +74,8 @@ Each module has its own TechSpec document.
   `docs/modules/techspec_block-extractor_v1.0.0-alpha.md`
 - Prompt  
   `prompts/block-extractor/prompt_v1.0.0-alpha.txt`
+- Dify Runtime Model Config  
+  `prompts/block-extractor/model_config_v1.0.0-alpha.json`
 
 Responsibility:
 - OCR-based text extraction

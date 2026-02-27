@@ -315,3 +315,17 @@ If complete failure:
 
 End of BlockExtractor TechSpec
 ```
+
+---
+
+## Dify Runtime Baseline (Reference)  
+## Dify 运行基线（参考）
+
+For current Dify deployment baseline, see:
+
+- `prompts/block-extractor/model_config_v1.0.0-alpha.json`
+
+中文说明：
+- 该文件用于记录当前线上/联调用的模型与参数（如 model、temperature、top_p、json object 输出、视觉输入绑定等）。
+- 未声明项默认沿用 Dify 平台默认值。
+
