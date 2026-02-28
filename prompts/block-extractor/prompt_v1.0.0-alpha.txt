@@ -52,7 +52,7 @@
   "image_size": { "width": 0, "height": 0 },
   "raw_text_lines": [
     {
-      "line_id": "string",
+      "line_id": "L0001",
       "text": "string",
       "bbox": { "x": 0.0, "y": 0.0, "w": 0.0, "h": 0.0 },
       "line_confidence": 0.0,
@@ -61,7 +61,7 @@
   ],
   "blocks": [
     {
-      "block_id": "string",
+      "block_id": "B0001",
       "block_type": "string",
       "text_raw": "string",
       "text_final": "string",
@@ -77,3 +77,7 @@
 - JSON 必须通过 `json.loads()` 解析，不得有尾随逗号。
 - `block_type` 严禁超出枚举范围。
 - `text_raw` 必须与其引用的 `line_refs` 内容完全匹配。
+- `line_id` 必须匹配 `^L\d{4,}$`，`block_id` 必须匹配 `^B\d{4,}$`。
+- `text` / `text_raw` / `text_final` 不允许空字符串。
+- `source_page` 必须 >= 1，`bbox` 数值范围必须在 0~1。
+- 顶层及关键对象不允许额外字段（additionalProperties=false）。
