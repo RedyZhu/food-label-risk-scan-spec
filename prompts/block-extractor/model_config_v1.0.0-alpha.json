@@ -1,0 +1,26 @@
+{
+  "module_name": "BlockExtractor",
+  "module_version": "v1.0.0-alpha",
+  "runtime": "dify",
+  "model_provider": "qwen",
+  "model_name": "qwen3.5-plus",
+  "generation_config": {
+    "temperature": 0.1,
+    "top_p": 0.2
+  },
+  "response_format": {
+    "type": "json_object"
+  },
+  "vision": {
+    "enabled": true,
+    "input_binding": "packaging_artwork",
+    "input_source": "user_input_node"
+  },
+  "reasoning": {
+    "reason_content": true
+  },
+  "notes": [
+    "All unspecified Dify settings use platform defaults.",
+    "This file records the baseline runtime configuration for reproducibility."
+  ]
+}
