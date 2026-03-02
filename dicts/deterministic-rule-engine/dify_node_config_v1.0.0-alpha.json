@@ -82,10 +82,10 @@
     },
     "regex": {
       "standard_code": [
-        "(?i)\\b(GB\\/T|GB|Q\\/|NY\\/T|SB\\/T|T\\/)\\s*[A-Z]*\\d+[A-Z0-9.-]*\\b"
+        "(?i)(GB\\/T|GB|Q\\/|NY\\/T|SB\\/T|T\\/)\\s*[A-Z]*\\d+[A-Z0-9.-]*"
       ],
       "sc_code": [
-        "(?i)\\bSC\\s*[0-9A-Z]{6,}\\b"
+        "(?i)SC\\s*[0-9A-Z]{6,}"
       ]
     },
     "thresholds": {
