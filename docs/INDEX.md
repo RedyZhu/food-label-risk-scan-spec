@@ -69,6 +69,10 @@ Modules must reference them instead of redefining fields.
 
 Each module has its own TechSpec document.
 
+Execution clarification (v1.0.0-alpha):
+- After BlockExtractor, DeterministicRuleEngine and SemanticRiskDetector are intended as parallel branches.
+- SeverityMapper and GuardrailAggregator consume branch outputs in later stages.
+
 ### 4.1 BlockExtractor
 - Spec
   `docs/modules/techspec_block-extractor_v1.0.0-alpha.md`
@@ -109,6 +113,8 @@ Responsibility:
   `docs/modules/techspec_semantic-risk-detector_v1.0.0-alpha.md`
 - Prompt
   `prompts/semantic-risk-detector/prompt_v1.0.0-alpha.txt`
+- Dify Runtime Model Config
+  `prompts/semantic-risk-detector/model_config_v1.0.0-alpha.json`
 
 Responsibility:
 - High-recall semantic risk discovery

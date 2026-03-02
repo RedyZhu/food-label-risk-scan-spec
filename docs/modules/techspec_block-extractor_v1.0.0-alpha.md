@@ -15,6 +15,8 @@ Schema Standard: JSON Schema Draft 2020-12
 - downstream_dependencies:
   - `DeterministicRuleEngine`
   - `SemanticRiskDetector`
+- orchestration_note:
+  - DeterministicRuleEngine and SemanticRiskDetector are parallel downstream branches in v1.0.0-alpha runtime.
 
 说明：
 

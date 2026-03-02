@@ -22,5 +22,7 @@
   "notes": [
     "All unspecified Dify settings use platform defaults.",
     "This file records the baseline runtime configuration for reproducibility."
+  ],
+  "dify_node_name": "BLOCK EXTRACTOR"
   ]
 }
