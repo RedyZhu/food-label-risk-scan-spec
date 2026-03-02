@@ -1,7 +1,7 @@
 # Food Label Risk Scan System — System TechSpec
-**System Version:** v1.0.0-alpha  
-**Schema Standard:** JSON Schema Draft 2020-12  
-**Dictionary Format:** JSON  
+**System Version:** v1.0.0-alpha
+**Schema Standard:** JSON Schema Draft 2020-12
+**Dictionary Format:** JSON
 **Source of Truth:** This repository (GitHub)
 
 ---
@@ -10,10 +10,10 @@
 
 ### 1.1 Goal
 Scan food label images (single or multiple pages) and produce:
-1) Replayable, reviewable text extraction and block structure  
-2) Deterministic structural/format/relationship findings (stable, reproducible)  
-3) High-recall semantic risk candidates (LLM; variance allowed)  
-4) Deterministic severity assignment (0 variance)  
+1) Replayable, reviewable text extraction and block structure
+2) Deterministic structural/format/relationship findings (stable, reproducible)
+3) High-recall semantic risk candidates (LLM; variance allowed)
+4) Deterministic severity assignment (0 variance)
 5) Guardrail validation + dedup + final output assembly
 
 ### 1.2 Alpha Non-Goals
@@ -45,6 +45,10 @@ Scan food label images (single or multiple pages) and produce:
 The current reference implementation uses **Dify** as the workflow/orchestration framework.
 This section documents integration notes only and does not change any normative contracts.
 
+### Dify Node Naming Convention (runtime recommendation)
+- Use uppercase + spaces for Dify node display names (e.g., `BLOCK EXTRACTOR`, `SEMANTIC RISK DETECTOR`, `DRE PATTERNS DICTIONARY`).
+- Keep JSON artifact `module_name` as canonical contract names.
+
 ### Module-to-Workflow Mapping (reference)
 - BlockExtractor: Dify LLM node
 - DeterministicRuleEngine: Dify Code node (deterministic execution)
@@ -58,6 +62,8 @@ Artifacts are passed between nodes as JSON variables:
 - Deterministic risk list
 - Semantic risk list
 - Severity mapping artifact
+
+Deterministic and semantic branches both read BlockExtractionArtifact as upstream input.
 
 Dictionaries (intents/regex/thresholds, severity mapping) are injected as configuration constants.
 All evidence snippets must remain exact substrings of extracted raw text.
@@ -74,13 +80,21 @@ The workflow engine may be replaced in future versions without changing module n
 - **GuardrailAggregator** (Code)
 
 ### 3.2 Execution Order (current v1.0.0-alpha)
-1) BlockExtractor  
-2) DeterministicRuleEngine  
-3) SemanticRiskDetector  
-4) SeverityMapper  
-5) GuardrailAggregator
 
-> Execution order may change in future versions. Module names remain stable.
+**Logical stage order**
+1) BlockExtractor
+2) Risk detection stage (parallel branches):
+   - DeterministicRuleEngine
+   - SemanticRiskDetector
+3) SeverityMapper
+4) GuardrailAggregator
+
+**Runtime orchestration note (important)**
+- DeterministicRuleEngine and SemanticRiskDetector both consume BlockExtractionArtifact and MAY run in parallel.
+- This spec defines stage ordering, not a strict serial dependency between DRE and SRE.
+- If one branch fails, the other branch may still continue and GuardrailAggregator should record errors.
+
+> Execution strategy may change in future versions. Module names and data contracts remain stable.
 
 ---
 
