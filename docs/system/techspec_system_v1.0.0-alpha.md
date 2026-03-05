@@ -357,7 +357,7 @@ System output `errors[]` should contain structured errors:
 Input validity clarification:
 
 * `risk_list = []` means valid zero-risk branch output.
-* `artifact = null` or missing artifact object means invalid input and should be recorded as an error.
+* `artifact = null` or missing artifact object means invalid input and must be recorded as an error with explicit missing field names.
 
 * If BlockExtractor fails → abort (cannot proceed)
 * If DeterministicRuleEngine fails → proceed with semantic only, mark error

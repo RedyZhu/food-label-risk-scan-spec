@@ -14,6 +14,10 @@
 - `deterministic_risks_artifact` / `semantic_risks_artifact` 必须是合法 JSON 对象，不可为 `null`、空字符串或缺失。
 - 两个对象中的 `risk_list` 可以是空数组 `[]`（表示 0 risk），这是合法场景。
 
+输入异常处理（必须执行）：
+- 若上游字段缺失或类型错误，必须输出错误对象，不得继续做 severity 映射。
+- 错误对象中必须包含缺失字段名（如 `missing_fields: ["deterministic_risks_artifact"]`）。
+
 ## 强制约束（Must Follow）
 1. 仅输出一个合法 JSON 对象，不输出 Markdown、解释文本或总结。
 2. 仅做 severity 映射，不新增风险对象；允许 `severity_list` 为空数组（当上游总风险为 0）。
@@ -48,9 +52,30 @@
   ]
 }
 
+
+## 输入异常时的输出格式（严格）
+{
+  "system_version": "v1.0.0-alpha",
+  "module_name": "SeverityMapper",
+  "module_version": "v1.0.0-alpha",
+  "spec_version": "v1.0.0-alpha",
+  "detection_method": "llm_mapping",
+  "severity_list": [],
+  "errors": [
+    {
+      "error_code": "INVALID_UPSTREAM_INPUT",
+      "module_name": "SeverityMapper",
+      "message": "missing required input fields",
+      "missing_fields": ["deterministic_risks_artifact"],
+      "severity": "error"
+    }
+  ]
+}
+
 ## 输出自检（生成前必须检查）
 - JSON 可被 `json.loads()` 解析。
 - 仅输出一个 JSON 对象。
 - `severity_list` 为数组，可为空但不能为 null。
 - 每条对象包含 `risk_type` 和 `severity`。
 - `severity` 仅取 `low|medium|high|critical`。
+- 上游输入异常时，`errors[].missing_fields` 必须列出具体缺失字段名。

@@ -27,6 +27,7 @@ Input assumptions:
 - 两个上游 artifact 必须存在且为 JSON 对象，不接受 `null`、空字符串或字段缺失。
 - 允许 `risk_list` 为空数组 `[]`（表示该分支 0 risk）。
 - 上游风险对象至少包含 `risk_type`、`detection_method`、`evidence`。
+- 上游字段缺失或类型错误时必须返回结构化错误，且标明缺失字段名。
 
 ---
 
@@ -53,6 +54,31 @@ Severity enum:
 - `medium`
 - `high`
 - `critical`
+
+
+## 3.1 Input Error Contract / 输入错误契约
+
+当上游输入不满足 required object 约束时，必须返回结构化错误，示例：
+
+```json
+{
+  "severity_list": [],
+  "errors": [
+    {
+      "error_code": "INVALID_UPSTREAM_INPUT",
+      "module_name": "SeverityMapper",
+      "message": "missing required input fields",
+      "missing_fields": ["semantic_risks_artifact"],
+      "severity": "error"
+    }
+  ]
+}
+```
+
+要求：
+- `missing_fields` 必须列出具体字段名。
+- 不允许在输入非法时输出伪造的 severity 映射结果。
+
 
 Severity interpretation (current-stage guidance):
 - `critical`: 一旦被监管或职业打假人盯上，通常会直接触发明确违规认定，且高概率伴随较高处罚/赔付暴露。
