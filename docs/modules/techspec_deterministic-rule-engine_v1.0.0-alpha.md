@@ -124,6 +124,17 @@ The module outputs a JSON object:
 }
 ```
 
+Runtime note (Dify integration):
+
+- In Dify Code node runtime, the returned payload may be wrapped by node output key (for example `{ "output": { ...artifact... } }` or `{ "result": { ...artifact... } }`).
+- The **module artifact contract** in this spec always refers to the inner object shown above.
+- For contract validation and downstream merge/dedup, use the inner artifact object and ensure required fields (including `schema_version`) are present.
+
+中文说明：
+- Dify 运行时可能按节点输出变量对结果做一层包装（如 `output` / `result`）。
+- 本规范中的 DRE 输出契约始终指包装内的 artifact 主体。
+- 做契约校验与下游汇总时，应使用内层对象，并保证 `schema_version` 等必填字段齐全。
+
 Each risk object includes:
 
 - `risk_type`
@@ -237,7 +248,7 @@ Reference node config:
 
 Baseline (current):
 
-- node_name: `DRE Patterns Dictionary`
+- node_name: `DRE PATTERNS DICTIONARY`
 - node_type: `Code`
 - input_params: none
 - output_mode: default
