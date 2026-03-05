@@ -53,6 +53,18 @@ Severity enum:
 - `high`
 - `critical`
 
+Severity interpretation (current-stage guidance):
+- `critical`: 一旦被监管或职业打假人盯上，通常会直接触发明确违规认定，且高概率伴随较高处罚/赔付暴露。
+- `high`: 存在较高违规风险，通常具备被立案或被集中追诉的可能；虽有申辩空间，但风险-收益对抗压力明显。
+- `medium`: 存在瑕疵或边界不清，可能引发争议，但最终被认定为违规的概率相对有限。
+- `low`: 单一风险点通常不足以独立构成违规，实务中一般不会被优先作为主攻点。
+
+职业打假人视角（用于语义理解，不作为法律结论）：
+- `critical`: 明显“高价值目标”。
+- `high`: 具备“可尝试推进”的现实机会。
+- `medium`: 通常不是优先投入对象。
+- `low`: 通常不值得单点投入。
+
 Hard constraints:
 - `severity` 仅可取上述枚举。
 - 不得改写上游 evidence 内容。

@@ -296,6 +296,17 @@ Severity enum:
 
 * `low | medium | high | critical`
 
+Severity interpretation (current-stage policy):
+- `critical`: Once scrutinized, the risk is highly likely to result in a direct non-compliance finding and material penalty exposure.
+- `high`: Significant non-compliance risk with realistic enforcement/claim opportunity, though some defense room may still exist.
+- `medium`: Noticeable defect or ambiguity exists, but the final non-compliance determination probability is relatively limited.
+- `low`: Usually difficult to treat as a standalone non-compliance trigger.
+
+Pragmatic anti-fraud perspective (non-normative, for calibration only):
+- `critical`: high-value target.
+- `high`: actionable opportunity.
+- `medium`: generally lower-priority.
+- `low`: typically not worth isolated effort.
 **MUST**
 
 * Severity is assigned only by SeverityMapper (current stage: LLM).
