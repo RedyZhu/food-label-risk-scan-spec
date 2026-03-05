@@ -43,6 +43,12 @@ Input assumptions:
   "severity_list": [
     {
       "risk_type": "semantic_claim_exaggeration",
+      "detection_method": "llm",
+      "evidence": {
+        "block_id": "B0001",
+        "raw_snippet": "string"
+      },
+      "fingerprint": "optional_sha256",
       "severity": "medium"
     }
   ]
@@ -94,6 +100,7 @@ Severity interpretation (current-stage guidance):
 
 Hard constraints:
 - `severity` 仅可取上述枚举。
+- 每条映射项必须包含可回匹配字段：`detection_method` + `evidence.block_id` + `evidence.raw_snippet`；`fingerprint` 为可选增强字段。
 - 不得改写上游 evidence 内容。
 - 不得新增/删除上游风险对象，只做映射输出。
 

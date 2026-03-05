@@ -21,9 +21,10 @@
 ## 强制约束（Must Follow）
 1. 仅输出一个合法 JSON 对象，不输出 Markdown、解释文本或总结。
 2. 仅做 severity 映射，不新增风险对象；允许 `severity_list` 为空数组（当上游总风险为 0）。
-3. 不改写上游 `evidence.raw_snippet`、`risk_description`、`risk_logic`。
-4. `severity` 仅允许：`low` / `medium` / `high` / `critical`。
-5. 禁止输出法律结论与整改建议。
+3. 每条 `severity_list` 必须携带可回匹配键：`detection_method` + `evidence.block_id` + `evidence.raw_snippet`（可选 `fingerprint`）。
+4. 不改写上游 `evidence.raw_snippet`、`risk_description`、`risk_logic`。
+5. `severity` 仅允许：`low` / `medium` / `high` / `critical`。
+6. 禁止输出法律结论与整改建议。
 
 ## Severity Enum 解释（当前阶段）
 - `critical`：一旦被监管或职业打假人盯上，通常会直接触发明确违规认定，且高概率伴随较高处罚/赔付暴露。
@@ -47,6 +48,12 @@
   "severity_list": [
     {
       "risk_type": "semantic_claim_exaggeration",
+      "detection_method": "llm",
+      "evidence": {
+        "block_id": "B0001",
+        "raw_snippet": "string"
+      },
+      "fingerprint": "optional_sha256",
       "severity": "medium"
     }
   ]
@@ -76,6 +83,6 @@
 - JSON 可被 `json.loads()` 解析。
 - 仅输出一个 JSON 对象。
 - `severity_list` 为数组，可为空但不能为 null。
-- 每条对象包含 `risk_type` 和 `severity`。
+- 每条对象包含 `risk_type`、`detection_method`、`evidence.block_id`、`evidence.raw_snippet`、`severity`。
 - `severity` 仅取 `low|medium|high|critical`。
 - 上游输入异常时，`errors[].missing_fields` 必须列出具体缺失字段名。

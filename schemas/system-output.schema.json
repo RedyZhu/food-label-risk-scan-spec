@@ -87,6 +87,8 @@
             "additionalProperties": false,
             "required": [
               "risk_type",
+              "detection_method",
+              "evidence",
               "severity"
             ],
             "properties": {
@@ -103,6 +105,35 @@
                   "critical",
                   "unknown"
                 ]
+              },
+              "detection_method": {
+                "type": "string",
+                "enum": [
+                  "rule_guardrail",
+                  "llm"
+                ]
+              },
+              "evidence": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "block_id",
+                  "raw_snippet"
+                ],
+                "properties": {
+                  "block_id": {
+                    "type": "string",
+                    "pattern": "^(B\\d{4,}|N/A)$"
+                  },
+                  "raw_snippet": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "fingerprint": {
+                "type": "string",
+                "minLength": 1
               }
             }
           }

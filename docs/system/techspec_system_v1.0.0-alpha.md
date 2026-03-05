@@ -1,7 +1,7 @@
 # Food Label Risk Scan System — System TechSpec
 **System Version:** v1.0.0-alpha
 **Schema Standard:** JSON Schema Draft 2020-12
-**Dictionary Format:** JSON
+**Dictionary Format:** JSON/YAML (module-specific)
 **Source of Truth:** This repository (GitHub)
 
 ---
@@ -13,7 +13,7 @@ Scan food label images (single or multiple pages) and produce:
 1) Replayable, reviewable text extraction and block structure
 2) Deterministic structural/format/relationship findings (stable, reproducible)
 3) High-recall semantic risk candidates (LLM; variance allowed)
-4) Deterministic severity assignment (0 variance)
+4) Severity assignment (current stage: LLM mapping with policy constraints)
 5) Guardrail validation + dedup + final output assembly
 
 ### 1.2 Alpha Non-Goals
@@ -108,6 +108,7 @@ The workflow engine may be replaced in future versions without changing module n
 - **SemanticRiskListArtifact**: formatted semantic findings (no severity)
 - **SeverityMappingArtifact**: risk_type → severity results
 - **FinalOutputArtifact**: validated, deduplicated final_risk_list
+- `fingerprint` is generated canonically by GuardrailAggregator; upstream modules may omit it.
 
 ### 4.2 Central Schemas
 All schema definitions are centralized in `schemas/`:
@@ -336,6 +337,7 @@ Hash:
 
 ### 10.2 Merge Rule (recommended)
 
+* Severity回填匹配优先级建议：`fingerprint`（若可用）> (`risk_type`+`detection_method`+`block_id`+normalized snippet) > `risk_type`。
 * If two risks share the same fingerprint → keep one.
 * If they share same `risk_type` + same snippet but different severity → keep the **higher** severity and record a conflict warning.
 
