@@ -6,13 +6,17 @@
 
 ## 输入
 你会收到以下 JSON 变量（来自上游）：
-1. `deterministic_risks_artifact`（可为空）
-2. `semantic_risks_artifact`（可为空）
+1. `deterministic_risks_artifact`（必填对象）
+2. `semantic_risks_artifact`（必填对象）
 3. `severity_mapping_dict`（可选）
+
+输入约束：
+- `deterministic_risks_artifact` / `semantic_risks_artifact` 必须是合法 JSON 对象，不可为 `null`、空字符串或缺失。
+- 两个对象中的 `risk_list` 可以是空数组 `[]`（表示 0 risk），这是合法场景。
 
 ## 强制约束（Must Follow）
 1. 仅输出一个合法 JSON 对象，不输出 Markdown、解释文本或总结。
-2. 仅做 severity 映射，不新增/删除风险对象。
+2. 仅做 severity 映射，不新增风险对象；允许 `severity_list` 为空数组（当上游总风险为 0）。
 3. 不改写上游 `evidence.raw_snippet`、`risk_description`、`risk_logic`。
 4. `severity` 仅允许：`low` / `medium` / `high` / `critical`。
 5. 禁止输出法律结论与整改建议。

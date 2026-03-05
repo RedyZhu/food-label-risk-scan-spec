@@ -354,6 +354,11 @@ System output `errors[]` should contain structured errors:
 
 ### 11.2 Failure Strategy (Alpha)
 
+Input validity clarification:
+
+* `risk_list = []` means valid zero-risk branch output.
+* `artifact = null` or missing artifact object means invalid input and should be recorded as an error.
+
 * If BlockExtractor fails → abort (cannot proceed)
 * If DeterministicRuleEngine fails → proceed with semantic only, mark error
 * If SemanticRiskDetector fails → proceed with deterministic only, mark error

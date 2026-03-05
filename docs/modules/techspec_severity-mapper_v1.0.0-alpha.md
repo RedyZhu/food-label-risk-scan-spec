@@ -19,13 +19,14 @@ Version: `v1.0.0-alpha`
 ## 2. Input Contract / 输入契约
 
 Required inputs:
-- `deterministic_risks_artifact`
-- `semantic_risks_artifact`
+- `deterministic_risks_artifact`（required object）
+- `semantic_risks_artifact`（required object）
 - `severity_mapping_dict`（可选，作为提示词内参考规则）
 
 Input assumptions:
+- 两个上游 artifact 必须存在且为 JSON 对象，不接受 `null`、空字符串或字段缺失。
+- 允许 `risk_list` 为空数组 `[]`（表示该分支 0 risk）。
 - 上游风险对象至少包含 `risk_type`、`detection_method`、`evidence`。
-- 允许某个分支为空。
 
 ---
 
