@@ -108,3 +108,11 @@ Pipeline stage:
 - `severity` 仅为合法枚举
 - `risk_type` 与上游可对齐
 - 同输入多次执行波动可观测（当前阶段允许）
+
+---
+
+## 8. Runtime Baseline / 运行基线
+
+- Prompt: `prompts/severity-mapper/prompt_v1.0.0-alpha.txt`
+- Dictionary (optional grounding): `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
+- Node type: LLM（current stage）

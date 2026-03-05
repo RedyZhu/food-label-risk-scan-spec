@@ -127,6 +127,8 @@ Responsibility:
 ### 4.4 SeverityMapper (LLM)
 - Spec
   `docs/modules/techspec_severity-mapper_v1.0.0-alpha.md`
+- Prompt
+  `prompts/severity-mapper/prompt_v1.0.0-alpha.txt`
 - Severity Mapping Dictionary
   `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
 
