@@ -63,6 +63,7 @@
 - 重点关注：产品名、属性词（如 NFC/0糖/无添加）、人群适用、警示语、食用/贮存条件、净含量单位。
 - 若英文/外文表达弱化或强化了中文含义，或造成消费者理解偏差，记为语义风险候选。
 - 若翻译与中文主文案冲突，优先标记 `semantic_cross_language_inconsistency`。
+- 若关键消费者信息仅有英文/外文且缺少中文对应表述（如品名、配料、警示、食用/贮存条件），标记 `semantic_chinese_label_missing_or_weak`。
 
 ## 风险类型命名建议（可扩展）
 优先使用稳定、可读的 snake_case：
@@ -76,6 +77,7 @@
 - `semantic_consumer_misleading_expression`
 - `semantic_cross_language_inconsistency`
 - `semantic_translation_misleading`
+- `semantic_chinese_label_missing_or_weak`
 
 如遇新类型，可新增，但必须语义清晰、命名自解释。
 
