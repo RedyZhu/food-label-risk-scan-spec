@@ -1,7 +1,7 @@
 # Food Label Risk Scan System — System TechSpec
-**System Version:** v1.0.0-alpha  
-**Schema Standard:** JSON Schema Draft 2020-12  
-**Dictionary Format:** JSON  
+**System Version:** v1.0.0-alpha
+**Schema Standard:** JSON Schema Draft 2020-12
+**Dictionary Format:** JSON
 **Source of Truth:** This repository (GitHub)
 
 ---
@@ -10,10 +10,10 @@
 
 ### 1.1 Goal
 Scan food label images (single or multiple pages) and produce:
-1) Replayable, reviewable text extraction and block structure  
-2) Deterministic structural/format/relationship findings (stable, reproducible)  
-3) High-recall semantic risk candidates (LLM; variance allowed)  
-4) Deterministic severity assignment (0 variance)  
+1) Replayable, reviewable text extraction and block structure
+2) Deterministic structural/format/relationship findings (stable, reproducible)
+3) High-recall semantic risk candidates (LLM; variance allowed)
+4) Deterministic severity assignment (0 variance)
 5) Guardrail validation + dedup + final output assembly
 
 ### 1.2 Alpha Non-Goals
@@ -32,7 +32,8 @@ Scan food label images (single or multiple pages) and produce:
 3) **Evidence fidelity**: any evidence snippet MUST be an exact substring from extracted raw text (except missing-type rules which use `"N/A"`).
 4) **No hallucinated text**: no words that do not exist in the image extraction.
 5) **Separation of concerns**:
-   - LLM modules do not assign severity.
+   - SRD performs semantic risk discovery only.
+   - SeverityMapper performs severity mapping only (current stage uses LLM).
    - Deterministic modules do not perform semantic risk discovery.
 6) **Versioned outputs**: each module output MUST include required version metadata.
 
@@ -45,11 +46,15 @@ Scan food label images (single or multiple pages) and produce:
 The current reference implementation uses **Dify** as the workflow/orchestration framework.
 This section documents integration notes only and does not change any normative contracts.
 
+### Dify Node Naming Convention (runtime recommendation)
+- Use uppercase + spaces for Dify node display names (e.g., `BLOCK EXTRACTOR`, `SEMANTIC RISK DETECTOR`, `DRE PATTERNS DICTIONARY`).
+- Keep JSON artifact `module_name` as canonical contract names.
+
 ### Module-to-Workflow Mapping (reference)
 - BlockExtractor: Dify LLM node
 - DeterministicRuleEngine: Dify Code node (deterministic execution)
 - SemanticRiskDetector: Dify LLM node
-- SeverityMapper: Dify Code node (deterministic mapping)
+- SeverityMapper: Dify LLM node (current stage)
 - GuardrailAggregator: Dify Code node (validation + dedup + assembly)
 
 ### Data Passing
@@ -58,6 +63,8 @@ Artifacts are passed between nodes as JSON variables:
 - Deterministic risk list
 - Semantic risk list
 - Severity mapping artifact
+
+Deterministic and semantic branches both read BlockExtractionArtifact as upstream input.
 
 Dictionaries (intents/regex/thresholds, severity mapping) are injected as configuration constants.
 All evidence snippets must remain exact substrings of extracted raw text.
@@ -70,17 +77,25 @@ The workflow engine may be replaced in future versions without changing module n
 - **BlockExtractor** (LLM)
 - **DeterministicRuleEngine** (Code)
 - **SemanticRiskDetector** (LLM)
-- **SeverityMapper** (Code)
+- **SeverityMapper** (LLM)
 - **GuardrailAggregator** (Code)
 
 ### 3.2 Execution Order (current v1.0.0-alpha)
-1) BlockExtractor  
-2) DeterministicRuleEngine  
-3) SemanticRiskDetector  
-4) SeverityMapper  
-5) GuardrailAggregator
 
-> Execution order may change in future versions. Module names remain stable.
+**Logical stage order**
+1) BlockExtractor
+2) Risk detection stage (parallel branches):
+   - DeterministicRuleEngine
+   - SemanticRiskDetector
+3) SeverityMapper
+4) GuardrailAggregator
+
+**Runtime orchestration note (important)**
+- DeterministicRuleEngine and SemanticRiskDetector both consume BlockExtractionArtifact and MAY run in parallel.
+- This spec defines stage ordering, not a strict serial dependency between DRE and SRE.
+- If one branch fails, the other branch may still continue and GuardrailAggregator should record errors.
+
+> Execution strategy may change in future versions. Module names and data contracts remain stable.
 
 ---
 
@@ -225,12 +240,12 @@ Each module artifact MUST include:
 * Relationship checks
 * Severity assignment
 
-### 7.4 SeverityMapper (Code)
+### 7.4 SeverityMapper (LLM)
 
 **Does**
 
-* Deterministically map `risk_type` (+ optional sub-tags) to severity enum
-* Enforces “critical whitelist” policy (if adopted)
+* Map `risk_type` (+ optional context) to severity enum (current stage: LLM)
+* Applies configured severity policy (including optional critical whitelist)
 
 **Does NOT**
 
@@ -239,7 +254,7 @@ Each module artifact MUST include:
 
 **Dict dependency**
 
-* Uses a JSON mapping dictionary.
+* Uses mapping rules/dictionary as prompt grounding (current stage).
 
 ### 7.5 GuardrailAggregator (Code)
 
@@ -283,10 +298,10 @@ Severity enum:
 
 **MUST**
 
-* Severity is assigned only by SeverityMapper (deterministic).
-* LLM modules must not output severity.
+* Severity is assigned only by SeverityMapper (current stage: LLM).
+* `SemanticRiskDetector` must not output severity.
 
-(If you adopt a “critical whitelist” policy, it must live in SeverityMapper dict/spec, not in prompts.)
+(If you adopt a “critical whitelist” policy in current stage, keep it in SeverityMapper prompt/config and version it.)
 
 ---
 
@@ -310,7 +325,7 @@ Hash:
 ### 10.2 Merge Rule (recommended)
 
 * If two risks share the same fingerprint → keep one.
-* If they share same `risk_type` + same snippet but different severity → keep the **higher** severity (should not happen if SeverityMapper is deterministic; treat as error if occurs).
+* If they share same `risk_type` + same snippet but different severity → keep the **higher** severity and record a conflict warning.
 
 ---
 
