@@ -354,6 +354,12 @@ System output `errors[]` should contain structured errors:
 
 ### 11.2 Failure Strategy (Alpha)
 
+
+Severity artifact handling note (GuardrailAggregator):
+- If `severity_mapping_artifact` is missing/invalid, GuardrailAggregator must emit structured errors and apply fixed policy (abort or degrade).
+- On degrade path, severity may use a fixed fallback (e.g., `unknown`) and must be explicitly marked.
+- Any `missing_fields` error from SeverityMapper input validation must be propagated to final `errors[]`.
+
 Input validity clarification:
 
 * `risk_list = []` means valid zero-risk branch output.
@@ -362,7 +368,7 @@ Input validity clarification:
 * If BlockExtractor fails → abort (cannot proceed)
 * If DeterministicRuleEngine fails → proceed with semantic only, mark error
 * If SemanticRiskDetector fails → proceed with deterministic only, mark error
-* If SeverityMapper fails → abort final output (severity is required)
+* If SeverityMapper fails → follow configured policy: abort (strict mode) or degrade with explicit errors (lenient mode)
 * If GuardrailAggregator fails → abort final output
 
 ---

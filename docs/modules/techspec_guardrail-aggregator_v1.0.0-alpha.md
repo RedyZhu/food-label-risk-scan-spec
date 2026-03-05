@@ -33,6 +33,7 @@ Input assumptions:
 - 输入 JSON 可解析。
 - 风险对象至少包含：`risk_type`、`detection_method`、`evidence`。
 - 当某分支失败时，允许进入降级汇总路径，但必须在 `errors` 留痕。
+- `severity_mapping_artifact` 可缺失；但若存在，必须是合法对象。
 
 ---
 
@@ -62,6 +63,33 @@ Input assumptions:
 - 按 `severity_mapping_artifact` 回填等级（若存在）。
 - 生成 `final_risk_list`、汇总 `errors`、输出最终工件。
 
+
+### 3.6 Severity Artifact Handling / Severity 工件处理规则
+
+GuardrailAggregator 对 `severity_mapping_artifact` 采用“优先消费 + 严格校验 + 可降级”策略：
+
+1) **Artifact 缺失**
+- 记录错误：`SEVERITY_ARTIFACT_MISSING`。
+- 若策略要求必须分级：终止最终输出。
+- 若允许降级：继续输出，但 `final_risk_list` 中 `severity` 置为 `unknown`（或按固定 fallback），并写入错误上下文。
+
+2) **Artifact 存在但结构非法**（如 `severity_list` 非数组、字段缺失）
+- 记录错误：`SEVERITY_ARTIFACT_INVALID`。
+- 不信任该 artifact 内容，按缺失策略处理（同上）。
+
+3) **Artifact 内有输入错误记录**（如 `INVALID_UPSTREAM_INPUT`）
+- 将该错误透传到最终 `errors`。
+- 对受影响 risk 不做静默映射，按降级策略处理。
+
+4) **正常映射场景**
+- 以 `risk_type` 为主键做回填。
+- 若同一 `risk_type` 出现多个 `severity`，按固定优先级处理并记录冲突：
+  `critical > high > medium > low`。
+
+5) **未命中映射场景**
+- 记录错误：`SEVERITY_NOT_MAPPED`，并包含 `risk_type`。
+- 按策略执行：终止 / 固定 fallback（必须在实现中固定）。
+
 ---
 
 ## 4. Output Contract / 输出契约
@@ -76,7 +104,7 @@ Input assumptions:
     {
       "risk_type": "string",
       "detection_method": "rule_guardrail|llm",
-      "severity": "low|medium|high|critical",
+      "severity": "low|medium|high|critical|unknown",
       "evidence": {
         "block_id": "B0001",
         "raw_snippet": "string"
@@ -140,7 +168,7 @@ Output guarantees:
 
 - DRE 失败：保留 SRD 分支结果并记录错误。
 - SRD 失败：保留 DRE 分支结果并记录错误。
-- SeverityMapper 失败：若业务要求“必须分级”，则终止；否则降级输出并写入错误。
+- SeverityMapper 失败或 severity artifact 非法：若业务要求“必须分级”，则终止；否则按固定降级策略输出并写入错误。
 - GuardrailAggregator 自身失败：终止最终输出。
 
 ---

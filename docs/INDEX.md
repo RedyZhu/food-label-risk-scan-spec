@@ -150,6 +150,7 @@ Responsibility:
 - Risk deduplication
 - Fingerprint generation
 - Final output assembly
+- Severity artifact validation & fallback handling
 
 ---
 
