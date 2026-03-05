@@ -104,7 +104,8 @@ The workflow engine may be replaced in future versions without changing module n
 ### 4.1 Global Object Model (high-level)
 - **BlockExtractionArtifact**: raw_text_lines + blocks
 - **DeterministicRiskListArtifact**: deterministic findings
-- **SemanticRiskListArtifact**: semantic findings (no severity)
+- **SemanticFindingsDraft**: SRD draft findings
+- **SemanticRiskListArtifact**: formatted semantic findings (no severity)
 - **SeverityMappingArtifact**: risk_type → severity results
 - **FinalOutputArtifact**: validated, deduplicated final_risk_list
 
@@ -256,7 +257,7 @@ Each module artifact MUST include:
 
 * Uses mapping rules/dictionary as prompt grounding (current stage).
 
-### 7.5 GuardrailAggregator (Code)
+### 7.6 GuardrailAggregator (Code)
 
 **Does**
 
