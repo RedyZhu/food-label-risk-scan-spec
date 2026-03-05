@@ -112,7 +112,7 @@ Responsibility:
 - Spec
   `docs/modules/techspec_semantic-risk-detector_v1.0.0-alpha.md`
 - Prompt
-  `prompts/semantic-risk-detector/prompt_v1.1.0-alpha.txt`
+  `prompts/semantic-risk-detector/prompt_v1.0.0-alpha.txt`
 - Dify Runtime Model Config
   `prompts/semantic-risk-detector/model_config_v1.0.0-alpha.json`
 
