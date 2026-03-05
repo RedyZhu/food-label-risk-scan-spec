@@ -32,7 +32,8 @@ Scan food label images (single or multiple pages) and produce:
 3) **Evidence fidelity**: any evidence snippet MUST be an exact substring from extracted raw text (except missing-type rules which use `"N/A"`).
 4) **No hallucinated text**: no words that do not exist in the image extraction.
 5) **Separation of concerns**:
-   - LLM modules do not assign severity.
+   - SRD performs semantic risk discovery only.
+   - SeverityMapper performs severity mapping only (current stage uses LLM).
    - Deterministic modules do not perform semantic risk discovery.
 6) **Versioned outputs**: each module output MUST include required version metadata.
 
@@ -52,9 +53,8 @@ This section documents integration notes only and does not change any normative 
 ### Module-to-Workflow Mapping (reference)
 - BlockExtractor: Dify LLM node
 - DeterministicRuleEngine: Dify Code node (deterministic execution)
-- SemanticRiskDetector: Dify LLM node (discovery draft output)
-- SemanticRiskFormatter: Dify Code node (strict JSON artifact formatter)
-- SeverityMapper: Dify Code node (deterministic mapping)
+- SemanticRiskDetector: Dify LLM node
+- SeverityMapper: Dify LLM node (current stage)
 - GuardrailAggregator: Dify Code node (validation + dedup + assembly)
 
 ### Data Passing
@@ -77,8 +77,7 @@ The workflow engine may be replaced in future versions without changing module n
 - **BlockExtractor** (LLM)
 - **DeterministicRuleEngine** (Code)
 - **SemanticRiskDetector** (LLM)
-- **SemanticRiskFormatter** (Code)
-- **SeverityMapper** (Code)
+- **SeverityMapper** (LLM)
 - **GuardrailAggregator** (Code)
 
 ### 3.2 Execution Order (current v1.0.0-alpha)
@@ -242,24 +241,12 @@ Each module artifact MUST include:
 * Relationship checks
 * Severity assignment
 
-### 7.4 SemanticRiskFormatter (Code)
+### 7.4 SeverityMapper (LLM)
 
 **Does**
 
-* Convert SRD draft findings into contract-compliant `SemanticRiskListArtifact`
-* Normalize fields and enforce evidence constraints
-
-**Does NOT**
-
-* Discover new risks
-* Assign severity
-
-### 7.5 SeverityMapper (Code)
-
-**Does**
-
-* Deterministically map `risk_type` (+ optional sub-tags) to severity enum
-* Enforces “critical whitelist” policy (if adopted)
+* Map `risk_type` (+ optional context) to severity enum (current stage: LLM)
+* Applies configured severity policy (including optional critical whitelist)
 
 **Does NOT**
 
@@ -268,7 +255,7 @@ Each module artifact MUST include:
 
 **Dict dependency**
 
-* Uses a JSON mapping dictionary.
+* Uses mapping rules/dictionary as prompt grounding (current stage).
 
 ### 7.6 GuardrailAggregator (Code)
 
@@ -310,12 +297,23 @@ Severity enum:
 
 * `low | medium | high | critical`
 
+Severity interpretation (current-stage policy):
+- `critical`: Once scrutinized, the risk is highly likely to result in a direct non-compliance finding and material penalty exposure.
+- `high`: Significant non-compliance risk with realistic enforcement/claim opportunity, though some defense room may still exist.
+- `medium`: Noticeable defect or ambiguity exists, but the final non-compliance determination probability is relatively limited.
+- `low`: Usually difficult to treat as a standalone non-compliance trigger.
+
+Pragmatic anti-fraud perspective (non-normative, for calibration only):
+- `critical`: high-value target.
+- `high`: actionable opportunity.
+- `medium`: generally lower-priority.
+- `low`: typically not worth isolated effort.
 **MUST**
 
-* Severity is assigned only by SeverityMapper (deterministic).
-* LLM modules must not output severity.
+* Severity is assigned only by SeverityMapper (current stage: LLM).
+* `SemanticRiskDetector` must not output severity.
 
-(If you adopt a “critical whitelist” policy, it must live in SeverityMapper dict/spec, not in prompts.)
+(If you adopt a “critical whitelist” policy in current stage, keep it in SeverityMapper prompt/config and version it.)
 
 ---
 
@@ -339,7 +337,7 @@ Hash:
 ### 10.2 Merge Rule (recommended)
 
 * If two risks share the same fingerprint → keep one.
-* If they share same `risk_type` + same snippet but different severity → keep the **higher** severity (should not happen if SeverityMapper is deterministic; treat as error if occurs).
+* If they share same `risk_type` + same snippet but different severity → keep the **higher** severity and record a conflict warning.
 
 ---
 
@@ -357,11 +355,21 @@ System output `errors[]` should contain structured errors:
 
 ### 11.2 Failure Strategy (Alpha)
 
+
+Severity artifact handling note (GuardrailAggregator):
+- If `severity_mapping_artifact` is missing/invalid, GuardrailAggregator must emit structured errors and apply fixed policy (abort or degrade).
+- On degrade path, severity may use a fixed fallback (e.g., `unknown`) and must be explicitly marked.
+- Any `missing_fields` error from SeverityMapper input validation must be propagated to final `errors[]`.
+
+Input validity clarification:
+
+* `risk_list = []` means valid zero-risk branch output.
+* `artifact = null` or missing artifact object means invalid input and must be recorded as an error with explicit missing field names.
+
 * If BlockExtractor fails → abort (cannot proceed)
 * If DeterministicRuleEngine fails → proceed with semantic only, mark error
 * If SemanticRiskDetector fails → proceed with deterministic only, mark error
-* If SemanticRiskFormatter fails → semantic branch marked failed, deterministic branch may continue
-* If SeverityMapper fails → abort final output (severity is required)
+* If SeverityMapper fails → follow configured policy: abort (strict mode) or degrade with explicit errors (lenient mode)
 * If GuardrailAggregator fails → abort final output
 
 ---

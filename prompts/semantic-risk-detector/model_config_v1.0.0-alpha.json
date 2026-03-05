@@ -29,12 +29,11 @@
   "output_contract": {
     "llm_raw_output_var": "text",
     "artifact_name": "semantic_risks_artifact",
-    "adapter_required": true
+    "adapter_required": false
   },
   "notes": [
-    "Baseline config for SRD parallel branch in v1.0.0-alpha.",
-    "Other unspecified Dify settings use platform defaults.",
-    "Use a downstream adapter/code node to parse LLM text into semantic_risks_artifact."
+    "SRD outputs contract-compliant semantic_risks_artifact directly.",
+    "Other unspecified Dify settings use platform defaults."
   ],
   "dify_node_name": "SEMANTIC RISK DETECTOR"
 }

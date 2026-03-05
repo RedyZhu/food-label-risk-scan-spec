@@ -124,35 +124,24 @@ Responsibility:
 
 ---
 
-### 4.4 SemanticRiskFormatter (Code)
-- Spec
-  `docs/modules/techspec_semantic-risk-formatter_v1.0.0-alpha.md`
-- Code
-  `src/semantic_risk_formatter/formatter_v1_0_0_alpha.py`
-
-Responsibility:
-- Parse SRD draft output
-- Normalize fields and evidence
-- Emit contract-compliant semantic_risks_artifact
-
----
-
-### 4.5 SeverityMapper (Code)
+### 4.4 SeverityMapper (LLM)
 - Spec
   `docs/modules/techspec_severity-mapper_v1.0.0-alpha.md`
+- Prompt
+  `prompts/severity-mapper/prompt_v1.0.0-alpha.txt`
+- Dify Runtime Model Config
+  `prompts/severity-mapper/model_config_v1.0.0-alpha.json`
 - Severity Mapping Dictionary
   `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
-- Code
-  `src/severity_mapper/mapper_v1_0_0_alpha.py`
 
 Responsibility:
 - Map risk_type → severity
-- Enforce severity constraints
-- Deterministic mapping only
+- Enforce severity enum constraints
+- Current stage uses LLM-based mapping
 
 ---
 
-### 4.5 GuardrailAggregator
+### 4.5 GuardrailAggregator (Code)
 - Spec
   `docs/modules/techspec_guardrail-aggregator_v1.0.0-alpha.md`
 - Code
@@ -163,6 +152,7 @@ Responsibility:
 - Risk deduplication
 - Fingerprint generation
 - Final output assembly
+- Severity artifact validation & fallback handling
 
 ---
 
