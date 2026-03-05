@@ -129,6 +129,8 @@ Responsibility:
   `docs/modules/techspec_severity-mapper_v1.0.0-alpha.md`
 - Prompt
   `prompts/severity-mapper/prompt_v1.0.0-alpha.txt`
+- Dify Runtime Model Config
+  `prompts/severity-mapper/model_config_v1.0.0-alpha.json`
 - Severity Mapping Dictionary
   `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
 

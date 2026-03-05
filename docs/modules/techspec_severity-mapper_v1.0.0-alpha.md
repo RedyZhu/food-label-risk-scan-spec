@@ -141,5 +141,6 @@ Pipeline stage:
 ## 8. Runtime Baseline / 运行基线
 
 - Prompt: `prompts/severity-mapper/prompt_v1.0.0-alpha.txt`
+- Model Config: `prompts/severity-mapper/model_config_v1.0.0-alpha.json`
 - Dictionary (optional grounding): `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
 - Node type: LLM（current stage）
