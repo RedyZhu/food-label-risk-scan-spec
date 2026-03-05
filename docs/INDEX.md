@@ -152,7 +152,7 @@ Responsibility:
 
 ---
 
-### 4.6 GuardrailAggregator (Code)
+### 4.5 GuardrailAggregator
 - Spec
   `docs/modules/techspec_guardrail-aggregator_v1.0.0-alpha.md`
 - Code

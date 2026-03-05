@@ -88,10 +88,8 @@ The workflow engine may be replaced in future versions without changing module n
 2) Risk detection stage (parallel branches):
    - DeterministicRuleEngine
    - SemanticRiskDetector
-3) Semantic formatting stage:
-   - SemanticRiskFormatter
-4) SeverityMapper
-5) GuardrailAggregator
+3) SeverityMapper
+4) GuardrailAggregator
 
 **Runtime orchestration note (important)**
 - DeterministicRuleEngine and SemanticRiskDetector both consume BlockExtractionArtifact and MAY run in parallel.

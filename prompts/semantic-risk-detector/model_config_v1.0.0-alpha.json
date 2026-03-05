@@ -28,14 +28,13 @@
   },
   "output_contract": {
     "llm_raw_output_var": "text",
-    "artifact_name": "semantic_findings_draft",
-    "adapter_required": true,
-    "adapter_node": "SEMANTIC RISK FORMATTER"
+    "artifact_name": "semantic_risks_artifact",
+    "adapter_required": true
   },
   "notes": [
-    "SRD only outputs discovery draft (semantic_findings_draft).",
-    "Use downstream SemanticRiskFormatter (Code) for strict artifact JSON-ization.",
-    "Other unspecified Dify settings use platform defaults."
+    "Baseline config for SRD parallel branch in v1.0.0-alpha.",
+    "Other unspecified Dify settings use platform defaults.",
+    "Use a downstream adapter/code node to parse LLM text into semantic_risks_artifact."
   ],
   "dify_node_name": "SEMANTIC RISK DETECTOR"
 }
