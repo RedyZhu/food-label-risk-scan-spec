@@ -9,7 +9,8 @@ Version: v1.0.0-alpha
 |---|---|---|
 | BlockExtractor | 分块提取器（文本识读与分块模块） | LLM module. Extracts `raw_text_lines` and `blocks`. |
 | DeterministicRuleEngine | 确定性规则引擎 | Code module. Runs deterministic checks (missing/format/relationship). |
-| SemanticRiskDetector | 语义风险检测器（高召回语义发现） | LLM module. Semantic discovery only, no severity. |
+| SemanticRiskDetector | 语义风险检测器（高召回语义发现） | LLM module. Semantic discovery draft only, no severity. |
+| SemanticRiskFormatter | 语义风险格式化器（契约化输出） | Code module. Converts SRD draft to strict semantic artifact. |
 | SeverityMapper | 严重程度映射器 | Code module. Maps `risk_type` → `severity` deterministically. |
 | GuardrailAggregator | 守卫聚合器（校验与汇总模块） | Code module. Validates schema/enums, dedup, fingerprint, final output. |
 

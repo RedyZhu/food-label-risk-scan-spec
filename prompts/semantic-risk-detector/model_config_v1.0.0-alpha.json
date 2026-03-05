@@ -1,0 +1,41 @@
+{
+  "module_name": "SemanticRiskDetector",
+  "module_alias": "SRD",
+  "module_version": "v1.0.0-alpha",
+  "runtime": "dify",
+  "model_provider": "qwen",
+  "model_name": "qwen3.5-plus",
+  "generation_config": {
+    "temperature": 0.2,
+    "top_p": 0.3
+  },
+  "response_format": {
+    "type": "json_object"
+  },
+  "vision": {
+    "enabled": false,
+    "input_binding": "block_extraction_artifact",
+    "input_source": "upstream_block_extractor_branch"
+  },
+  "reasoning": {
+    "reason_content": true
+  },
+  "input_contract": {
+    "required": [
+      "block_extraction_artifact"
+    ],
+    "optional": []
+  },
+  "output_contract": {
+    "llm_raw_output_var": "text",
+    "artifact_name": "semantic_findings_draft",
+    "adapter_required": true,
+    "adapter_node": "SEMANTIC RISK FORMATTER"
+  },
+  "notes": [
+    "SRD only outputs discovery draft (semantic_findings_draft).",
+    "Use downstream SemanticRiskFormatter (Code) for strict artifact JSON-ization.",
+    "Other unspecified Dify settings use platform defaults."
+  ],
+  "dify_node_name": "SEMANTIC RISK DETECTOR"
+}

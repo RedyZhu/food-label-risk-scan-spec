@@ -1,7 +1,7 @@
 # Food Label Risk Scan System — System TechSpec
-**System Version:** v1.0.0-alpha  
-**Schema Standard:** JSON Schema Draft 2020-12  
-**Dictionary Format:** JSON  
+**System Version:** v1.0.0-alpha
+**Schema Standard:** JSON Schema Draft 2020-12
+**Dictionary Format:** JSON
 **Source of Truth:** This repository (GitHub)
 
 ---
@@ -10,10 +10,10 @@
 
 ### 1.1 Goal
 Scan food label images (single or multiple pages) and produce:
-1) Replayable, reviewable text extraction and block structure  
-2) Deterministic structural/format/relationship findings (stable, reproducible)  
-3) High-recall semantic risk candidates (LLM; variance allowed)  
-4) Deterministic severity assignment (0 variance)  
+1) Replayable, reviewable text extraction and block structure
+2) Deterministic structural/format/relationship findings (stable, reproducible)
+3) High-recall semantic risk candidates (LLM; variance allowed)
+4) Deterministic severity assignment (0 variance)
 5) Guardrail validation + dedup + final output assembly
 
 ### 1.2 Alpha Non-Goals
@@ -45,10 +45,15 @@ Scan food label images (single or multiple pages) and produce:
 The current reference implementation uses **Dify** as the workflow/orchestration framework.
 This section documents integration notes only and does not change any normative contracts.
 
+### Dify Node Naming Convention (runtime recommendation)
+- Use uppercase + spaces for Dify node display names (e.g., `BLOCK EXTRACTOR`, `SEMANTIC RISK DETECTOR`, `DRE PATTERNS DICTIONARY`).
+- Keep JSON artifact `module_name` as canonical contract names.
+
 ### Module-to-Workflow Mapping (reference)
 - BlockExtractor: Dify LLM node
 - DeterministicRuleEngine: Dify Code node (deterministic execution)
-- SemanticRiskDetector: Dify LLM node
+- SemanticRiskDetector: Dify LLM node (discovery draft output)
+- SemanticRiskFormatter: Dify Code node (strict JSON artifact formatter)
 - SeverityMapper: Dify Code node (deterministic mapping)
 - GuardrailAggregator: Dify Code node (validation + dedup + assembly)
 
@@ -58,6 +63,8 @@ Artifacts are passed between nodes as JSON variables:
 - Deterministic risk list
 - Semantic risk list
 - Severity mapping artifact
+
+Deterministic and semantic branches both read BlockExtractionArtifact as upstream input.
 
 Dictionaries (intents/regex/thresholds, severity mapping) are injected as configuration constants.
 All evidence snippets must remain exact substrings of extracted raw text.
@@ -70,17 +77,28 @@ The workflow engine may be replaced in future versions without changing module n
 - **BlockExtractor** (LLM)
 - **DeterministicRuleEngine** (Code)
 - **SemanticRiskDetector** (LLM)
+- **SemanticRiskFormatter** (Code)
 - **SeverityMapper** (Code)
 - **GuardrailAggregator** (Code)
 
 ### 3.2 Execution Order (current v1.0.0-alpha)
-1) BlockExtractor  
-2) DeterministicRuleEngine  
-3) SemanticRiskDetector  
-4) SeverityMapper  
+
+**Logical stage order**
+1) BlockExtractor
+2) Risk detection stage (parallel branches):
+   - DeterministicRuleEngine
+   - SemanticRiskDetector
+3) Semantic formatting stage:
+   - SemanticRiskFormatter
+4) SeverityMapper
 5) GuardrailAggregator
 
-> Execution order may change in future versions. Module names remain stable.
+**Runtime orchestration note (important)**
+- DeterministicRuleEngine and SemanticRiskDetector both consume BlockExtractionArtifact and MAY run in parallel.
+- This spec defines stage ordering, not a strict serial dependency between DRE and SRE.
+- If one branch fails, the other branch may still continue and GuardrailAggregator should record errors.
+
+> Execution strategy may change in future versions. Module names and data contracts remain stable.
 
 ---
 
@@ -89,7 +107,8 @@ The workflow engine may be replaced in future versions without changing module n
 ### 4.1 Global Object Model (high-level)
 - **BlockExtractionArtifact**: raw_text_lines + blocks
 - **DeterministicRiskListArtifact**: deterministic findings
-- **SemanticRiskListArtifact**: semantic findings (no severity)
+- **SemanticFindingsDraft**: SRD draft findings
+- **SemanticRiskListArtifact**: formatted semantic findings (no severity)
 - **SeverityMappingArtifact**: risk_type → severity results
 - **FinalOutputArtifact**: validated, deduplicated final_risk_list
 
@@ -225,7 +244,19 @@ Each module artifact MUST include:
 * Relationship checks
 * Severity assignment
 
-### 7.4 SeverityMapper (Code)
+### 7.4 SemanticRiskFormatter (Code)
+
+**Does**
+
+* Convert SRD draft findings into contract-compliant `SemanticRiskListArtifact`
+* Normalize fields and enforce evidence constraints
+
+**Does NOT**
+
+* Discover new risks
+* Assign severity
+
+### 7.5 SeverityMapper (Code)
 
 **Does**
 
@@ -241,7 +272,7 @@ Each module artifact MUST include:
 
 * Uses a JSON mapping dictionary.
 
-### 7.5 GuardrailAggregator (Code)
+### 7.6 GuardrailAggregator (Code)
 
 **Does**
 
@@ -331,6 +362,7 @@ System output `errors[]` should contain structured errors:
 * If BlockExtractor fails → abort (cannot proceed)
 * If DeterministicRuleEngine fails → proceed with semantic only, mark error
 * If SemanticRiskDetector fails → proceed with deterministic only, mark error
+* If SemanticRiskFormatter fails → semantic branch marked failed, deterministic branch may continue
 * If SeverityMapper fails → abort final output (severity is required)
 * If GuardrailAggregator fails → abort final output
 

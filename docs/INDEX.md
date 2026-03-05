@@ -1,6 +1,6 @@
-# Food Label Risk Scan System  
-Documentation Index  
-Version: v1.0.0-alpha  
+# Food Label Risk Scan System
+Documentation Index
+Version: v1.0.0-alpha
 
 ---
 
@@ -15,7 +15,7 @@ This repository is the **single source of truth** for:
 - Deterministic rule definitions
 - LLM prompt versions
 
-All specifications here are version-controlled.  
+All specifications here are version-controlled.
 No external document (Google Docs, etc.) overrides this repository.
 
 ---
@@ -24,17 +24,17 @@ No external document (Google Docs, etc.) overrides this repository.
 
 If you are new to this system, read in the following order:
 
-1️⃣ System Overview  
-2️⃣ Data Schemas  
-3️⃣ Risk Type Registry  
-4️⃣ Module Specifications  
-5️⃣ Dictionaries & Pattern Definitions  
+1️⃣ System Overview
+2️⃣ Data Schemas
+3️⃣ Risk Type Registry
+4️⃣ Module Specifications
+5️⃣ Dictionaries & Pattern Definitions
 
 ---
 
 ## 2. System-Level Specification
 
-- System TechSpec  
+- System TechSpec
   `docs/system/techspec_system_v1.0.0-alpha.md`
 
 This document defines:
@@ -51,16 +51,16 @@ This document defines:
 
 All modules must strictly follow these schemas.
 
-- Block Schema  
+- Block Schema
   `schemas/block.schema.json`
 
-- Risk Object Schema  
+- Risk Object Schema
   `schemas/risk-object.schema.json`
 
-- System Output Schema  
+- System Output Schema
   `schemas/system-output.schema.json`
 
-⚠ Schema definitions are centralized here.  
+⚠ Schema definitions are centralized here.
 Modules must reference them instead of redefining fields.
 
 ---
@@ -69,11 +69,17 @@ Modules must reference them instead of redefining fields.
 
 Each module has its own TechSpec document.
 
+Execution clarification (v1.0.0-alpha):
+- After BlockExtractor, DeterministicRuleEngine and SemanticRiskDetector are intended as parallel branches.
+- SeverityMapper and GuardrailAggregator consume branch outputs in later stages.
+
 ### 4.1 BlockExtractor
-- Spec  
+- Spec
   `docs/modules/techspec_block-extractor_v1.0.0-alpha.md`
-- Prompt  
+- Prompt
   `prompts/block-extractor/prompt_v1.0.0-alpha.txt`
+- Dify Runtime Model Config
+  `prompts/block-extractor/model_config_v1.0.0-alpha.json`
 
 Responsibility:
 - OCR-based text extraction
@@ -84,11 +90,13 @@ Responsibility:
 ---
 
 ### 4.2 DeterministicRuleEngine
-- Spec  
+- Spec
   `docs/modules/techspec_deterministic-rule-engine_v1.0.0-alpha.md`
-- Patterns / Regex Dictionary  
+- Patterns / Regex Dictionary
   `dicts/deterministic-rule-engine/patterns_v1.0.0-alpha.json`
-- Code  
+- Dify Node Config (Patterns Injector)
+  `dicts/deterministic-rule-engine/dify_node_config_v1.0.0-alpha.json`
+- Code
   `src/deterministic_rule_engine/engine_v1_0_0_alpha.py`
 
 Responsibility:
@@ -101,10 +109,12 @@ Responsibility:
 ---
 
 ### 4.3 SemanticRiskDetector
-- Spec  
+- Spec
   `docs/modules/techspec_semantic-risk-detector_v1.0.0-alpha.md`
-- Prompt  
+- Prompt
   `prompts/semantic-risk-detector/prompt_v1.0.0-alpha.txt`
+- Dify Runtime Model Config
+  `prompts/semantic-risk-detector/model_config_v1.0.0-alpha.json`
 
 Responsibility:
 - High-recall semantic risk discovery
@@ -114,12 +124,25 @@ Responsibility:
 
 ---
 
-### 4.4 SeverityMapper
-- Spec  
+### 4.4 SemanticRiskFormatter (Code)
+- Spec
+  `docs/modules/techspec_semantic-risk-formatter_v1.0.0-alpha.md`
+- Code
+  `src/semantic_risk_formatter/formatter_v1_0_0_alpha.py`
+
+Responsibility:
+- Parse SRD draft output
+- Normalize fields and evidence
+- Emit contract-compliant semantic_risks_artifact
+
+---
+
+### 4.5 SeverityMapper (Code)
+- Spec
   `docs/modules/techspec_severity-mapper_v1.0.0-alpha.md`
-- Severity Mapping Dictionary  
-  `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.json`
-- Code  
+- Severity Mapping Dictionary
+  `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
+- Code
   `src/severity_mapper/mapper_v1_0_0_alpha.py`
 
 Responsibility:
@@ -129,10 +152,10 @@ Responsibility:
 
 ---
 
-### 4.5 GuardrailAggregator
-- Spec  
+### 4.6 GuardrailAggregator (Code)
+- Spec
   `docs/modules/techspec_guardrail-aggregator_v1.0.0-alpha.md`
-- Code  
+- Code
   `src/guardrail_aggregator/aggregator_v1_0_0_alpha.py`
 
 Responsibility:
@@ -145,7 +168,7 @@ Responsibility:
 
 ## 5. Risk Type Registry
 
-- Registry Document  
+- Registry Document
   `docs/registry/risk_type_registry_v1.0.0-alpha.md`
 
 This document defines:
@@ -174,7 +197,7 @@ Includes:
 - Strong/weak trigger classification
 
 ### Severity Mapping Rules
-- `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.json`
+- `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
 
 Includes:
 - risk_type → severity mapping
