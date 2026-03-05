@@ -124,11 +124,24 @@ Responsibility:
 
 ---
 
-### 4.4 SeverityMapper
+### 4.4 SemanticRiskFormatter (Code)
+- Spec
+  `docs/modules/techspec_semantic-risk-formatter_v1.0.0-alpha.md`
+- Code
+  `src/semantic_risk_formatter/formatter_v1_0_0_alpha.py`
+
+Responsibility:
+- Parse SRD draft output
+- Normalize fields and evidence
+- Emit contract-compliant semantic_risks_artifact
+
+---
+
+### 4.5 SeverityMapper (Code)
 - Spec
   `docs/modules/techspec_severity-mapper_v1.0.0-alpha.md`
 - Severity Mapping Dictionary
-  `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.json`
+  `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
 - Code
   `src/severity_mapper/mapper_v1_0_0_alpha.py`
 
@@ -184,7 +197,7 @@ Includes:
 - Strong/weak trigger classification
 
 ### Severity Mapping Rules
-- `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.json`
+- `dicts/severity-mapper/severity_mapping_v1.0.0-alpha.yaml`
 
 Includes:
 - risk_type → severity mapping

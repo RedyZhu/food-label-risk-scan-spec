@@ -52,7 +52,8 @@ This section documents integration notes only and does not change any normative 
 ### Module-to-Workflow Mapping (reference)
 - BlockExtractor: Dify LLM node
 - DeterministicRuleEngine: Dify Code node (deterministic execution)
-- SemanticRiskDetector: Dify LLM node
+- SemanticRiskDetector: Dify LLM node (discovery draft output)
+- SemanticRiskFormatter: Dify Code node (strict JSON artifact formatter)
 - SeverityMapper: Dify Code node (deterministic mapping)
 - GuardrailAggregator: Dify Code node (validation + dedup + assembly)
 
@@ -76,6 +77,7 @@ The workflow engine may be replaced in future versions without changing module n
 - **BlockExtractor** (LLM)
 - **DeterministicRuleEngine** (Code)
 - **SemanticRiskDetector** (LLM)
+- **SemanticRiskFormatter** (Code)
 - **SeverityMapper** (Code)
 - **GuardrailAggregator** (Code)
 
@@ -103,7 +105,8 @@ The workflow engine may be replaced in future versions without changing module n
 ### 4.1 Global Object Model (high-level)
 - **BlockExtractionArtifact**: raw_text_lines + blocks
 - **DeterministicRiskListArtifact**: deterministic findings
-- **SemanticRiskListArtifact**: semantic findings (no severity)
+- **SemanticFindingsDraft**: SRD draft findings
+- **SemanticRiskListArtifact**: formatted semantic findings (no severity)
 - **SeverityMappingArtifact**: risk_type → severity results
 - **FinalOutputArtifact**: validated, deduplicated final_risk_list
 
@@ -239,7 +242,19 @@ Each module artifact MUST include:
 * Relationship checks
 * Severity assignment
 
-### 7.4 SeverityMapper (Code)
+### 7.4 SemanticRiskFormatter (Code)
+
+**Does**
+
+* Convert SRD draft findings into contract-compliant `SemanticRiskListArtifact`
+* Normalize fields and enforce evidence constraints
+
+**Does NOT**
+
+* Discover new risks
+* Assign severity
+
+### 7.5 SeverityMapper (Code)
 
 **Does**
 
@@ -255,7 +270,7 @@ Each module artifact MUST include:
 
 * Uses a JSON mapping dictionary.
 
-### 7.5 GuardrailAggregator (Code)
+### 7.6 GuardrailAggregator (Code)
 
 **Does**
 
@@ -345,6 +360,7 @@ System output `errors[]` should contain structured errors:
 * If BlockExtractor fails → abort (cannot proceed)
 * If DeterministicRuleEngine fails → proceed with semantic only, mark error
 * If SemanticRiskDetector fails → proceed with deterministic only, mark error
+* If SemanticRiskFormatter fails → semantic branch marked failed, deterministic branch may continue
 * If SeverityMapper fails → abort final output (severity is required)
 * If GuardrailAggregator fails → abort final output
 
