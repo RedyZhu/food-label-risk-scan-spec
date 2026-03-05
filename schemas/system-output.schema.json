@@ -1,1 +1,186 @@
-#
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/system-output.schema.v1.0.0-alpha.json",
+  "title": "FinalOutputArtifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "system_version",
+    "request_id",
+    "artifacts",
+    "final_risk_list",
+    "errors"
+  ],
+  "properties": {
+    "system_version": {
+      "type": "string",
+      "const": "v1.0.0-alpha"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block_extraction",
+        "deterministic_risks",
+        "semantic_risks",
+        "severity_mapping"
+      ],
+      "properties": {
+        "block_extraction": {
+          "type": "object"
+        },
+        "deterministic_risks": {
+          "$ref": "#/$defs/risk_list_artifact"
+        },
+        "semantic_risks": {
+          "$ref": "#/$defs/risk_list_artifact"
+        },
+        "severity_mapping": {
+          "$ref": "#/$defs/severity_mapping_artifact"
+        }
+      }
+    },
+    "final_risk_list": {
+      "type": "array",
+      "items": {
+        "$ref": "risk-object.schema.json"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/error_object"
+      }
+    }
+  },
+  "$defs": {
+    "risk_list_artifact": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "risk_list"
+      ],
+      "properties": {
+        "risk_list": {
+          "type": "array",
+          "items": {
+            "$ref": "risk-object.schema.json"
+          }
+        }
+      }
+    },
+    "severity_mapping_artifact": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "severity_list"
+      ],
+      "properties": {
+        "severity_list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "risk_type",
+              "detection_method",
+              "evidence",
+              "severity"
+            ],
+            "properties": {
+              "risk_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical",
+                  "unknown"
+                ]
+              },
+              "detection_method": {
+                "type": "string",
+                "enum": [
+                  "rule_guardrail",
+                  "llm"
+                ]
+              },
+              "evidence": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "block_id",
+                  "raw_snippet"
+                ],
+                "properties": {
+                  "block_id": {
+                    "type": "string",
+                    "pattern": "^(B\\d{4,}|N/A)$"
+                  },
+                  "raw_snippet": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "fingerprint": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "error_object": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "error_code",
+        "module_name",
+        "message",
+        "severity"
+      ],
+      "properties": {
+        "error_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "module_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "context": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
