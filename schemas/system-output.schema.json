@@ -87,8 +87,6 @@
             "additionalProperties": false,
             "required": [
               "risk_type",
-              "source_module",
-              "source_risk_index",
               "detection_method",
               "evidence",
               "severity"
@@ -97,17 +95,6 @@
               "risk_type": {
                 "type": "string",
                 "minLength": 1
-              },
-              "source_module": {
-                "type": "string",
-                "enum": [
-                  "DeterministicRuleEngine",
-                  "SemanticRiskDetector"
-                ]
-              },
-              "source_risk_index": {
-                "type": "integer",
-                "minimum": 0
               },
               "severity": {
                 "type": "string",

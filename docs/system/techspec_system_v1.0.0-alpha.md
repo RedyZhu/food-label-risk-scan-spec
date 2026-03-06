@@ -104,8 +104,9 @@ The workflow engine may be replaced in future versions without changing module n
 ### 4.1 Global Object Model (high-level)
 - **BlockExtractionArtifact**: raw_text_lines + blocks
 - **DeterministicRiskListArtifact**: deterministic findings
-- **SemanticRiskListArtifact**: semantic findings (no severity)
-- **SeverityMappingArtifact**: per-risk severity results with stable reference keys (`source_module` + `source_risk_index`)
+- **SemanticFindingsDraft**: SRD draft findings
+- **SemanticRiskListArtifact**: formatted semantic findings (no severity)
+- **SeverityMappingArtifact**: risk_type → severity results
 - **FinalOutputArtifact**: validated, deduplicated final_risk_list
 - `fingerprint` is generated canonically by GuardrailAggregator; upstream modules may omit it.
 
@@ -257,7 +258,7 @@ Each module artifact MUST include:
 
 * Uses mapping rules/dictionary as prompt grounding (current stage).
 
-### 7.5 GuardrailAggregator (Code)
+### 7.6 GuardrailAggregator (Code)
 
 **Does**
 
@@ -336,7 +337,7 @@ Hash:
 
 ### 10.2 Merge Rule (recommended)
 
-* Severity回填匹配优先级建议：(`source_module`+`source_risk_index`) > `fingerprint`（若可用）> (`risk_type`+`detection_method`+`block_id`+normalized snippet) > `risk_type`。
+* Severity回填匹配优先级建议：`fingerprint`（若可用）> (`risk_type`+`detection_method`+`block_id`+normalized snippet) > `risk_type`。
 * If two risks share the same fingerprint → keep one.
 * If they share same `risk_type` + same snippet but different severity → keep the **higher** severity and record a conflict warning.
 
