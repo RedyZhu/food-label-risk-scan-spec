@@ -1,1 +1,209 @@
-
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/block.schema.v1.0.0-alpha.json",
+  "title": "BlockExtractionArtifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "system_version",
+    "module_name",
+    "module_version",
+    "spec_version",
+    "schema_version",
+    "coordinate_system",
+    "image_size",
+    "raw_text_lines",
+    "blocks"
+  ],
+  "properties": {
+    "system_version": {
+      "type": "string",
+      "const": "v1.0.0-alpha"
+    },
+    "module_name": {
+      "type": "string",
+      "const": "BlockExtractor"
+    },
+    "module_version": {
+      "type": "string",
+      "const": "v1.0.0-alpha"
+    },
+    "spec_version": {
+      "type": "string",
+      "const": "v1.0.0-alpha"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "block.schema.v1.0.0-alpha"
+    },
+    "coordinate_system": {
+      "type": "string",
+      "const": "normalized"
+    },
+    "image_size": {
+      "$ref": "#/$defs/image_size"
+    },
+    "raw_text_lines": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/raw_text_line"
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/block"
+      }
+    }
+  },
+  "$defs": {
+    "bbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "w": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "h": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "image_size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "raw_text_line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "line_id",
+        "text",
+        "bbox",
+        "line_confidence",
+        "source_page"
+      ],
+      "properties": {
+        "line_id": {
+          "type": "string",
+          "pattern": "^L\\d{4,}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bbox": {
+          "$ref": "#/$defs/bbox"
+        },
+        "line_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "source_page": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block_id",
+        "block_type",
+        "text_raw",
+        "text_final",
+        "bbox",
+        "confidence",
+        "line_refs",
+        "source_page"
+      ],
+      "properties": {
+        "block_id": {
+          "type": "string",
+          "pattern": "^B\\d{4,}$"
+        },
+        "block_type": {
+          "type": "string",
+          "enum": [
+            "title",
+            "claim_strip",
+            "ingredient",
+            "nutrition",
+            "standard",
+            "license",
+            "producer",
+            "date_shelf_life",
+            "storage",
+            "warning",
+            "barcode",
+            "other"
+          ]
+        },
+        "text_raw": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text_final": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bbox": {
+          "$ref": "#/$defs/bbox"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "line_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^L\\d{4,}$"
+          }
+        },
+        "source_page": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

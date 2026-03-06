@@ -1,0 +1,42 @@
+{
+  "module_name": "SeverityMapper",
+  "module_version": "v1.0.0-alpha",
+  "runtime": "dify",
+  "module_type": "LLM",
+  "model_provider": "qwen",
+  "model_name": "qwen3.5-plus",
+  "generation_config": {
+    "temperature": 0,
+    "top_p": 0.2
+  },
+  "response_format": {
+    "type": "json_object"
+  },
+  "reasoning": {
+    "reason_content": true
+  },
+  "input_contract": {
+    "required": [
+      "deterministic_risks_artifact",
+      "semantic_risks_artifact"
+    ],
+    "optional": [
+      "severity_mapping_dict"
+    ]
+  },
+  "output_contract": {
+    "llm_raw_output_var": "text",
+    "artifact_name": "severity_mapping_artifact",
+    "adapter_required": false
+  },
+  "error_contract": {
+    "require_explicit_missing_fields": true,
+    "error_code_on_invalid_input": "INVALID_UPSTREAM_INPUT"
+  },
+  "dify_node_name": "SEVERITY MAPPER",
+  "notes": [
+    "Current stage uses LLM mapping for severity assignment.",
+    "Upstream artifacts must be JSON objects; risk_list=[] is valid while null/missing is invalid.",
+    "Other unspecified Dify settings use platform defaults."
+  ]
+}

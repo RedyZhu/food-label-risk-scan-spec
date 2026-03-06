@@ -1,1 +1,74 @@
-
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/risk-object.schema.v1.0.0-alpha.json",
+  "title": "RiskObject",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "risk_type",
+    "detection_method",
+    "evidence",
+    "risk_description",
+    "risk_logic"
+  ],
+  "properties": {
+    "risk_type": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "detection_method": {
+      "type": "string",
+      "enum": [
+        "rule_guardrail",
+        "llm",
+        "llm_mapping"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical",
+        "unknown"
+      ]
+    },
+    "evidence": {
+      "$ref": "#/$defs/evidence"
+    },
+    "risk_description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "risk_logic": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fingerprint": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block_id",
+        "raw_snippet"
+      ],
+      "properties": {
+        "block_id": {
+          "type": "string",
+          "pattern": "^(B\\d{4,}|N/A)$"
+        },
+        "raw_snippet": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

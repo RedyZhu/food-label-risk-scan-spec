@@ -1,5 +1,5 @@
-# Terminology / 术语对照表  
-Version: v1.0.0-alpha  
+# Terminology / 术语对照表
+Version: v1.0.0-alpha
 
 ---
 
@@ -9,8 +9,8 @@ Version: v1.0.0-alpha
 |---|---|---|
 | BlockExtractor | 分块提取器（文本识读与分块模块） | LLM module. Extracts `raw_text_lines` and `blocks`. |
 | DeterministicRuleEngine | 确定性规则引擎 | Code module. Runs deterministic checks (missing/format/relationship). |
-| SemanticRiskDetector | 语义风险检测器（高召回语义发现） | LLM module. Semantic discovery only, no severity. |
-| SeverityMapper | 严重程度映射器 | Code module. Maps `risk_type` → `severity` deterministically. |
+| SemanticRiskDetector | 语义风险检测器（高召回语义发现） | LLM module. Outputs semantic risk candidates with evidence binding. |
+| SeverityMapper | 严重程度映射器 | LLM module (current stage). Maps `risk_type` → `severity`. |
 | GuardrailAggregator | 守卫聚合器（校验与汇总模块） | Code module. Validates schema/enums, dedup, fingerprint, final output. |
 
 ---
@@ -46,7 +46,7 @@ Version: v1.0.0-alpha
 | rule_guardrail | 确定性规则检测 | Produced by DeterministicRuleEngine. |
 | llm | LLM 检测 | Produced by LLM modules (semantic discovery). |
 | severity | 严重程度 | Enum: low / medium / high / critical. |
-| severity mapping | 严重程度映射 | Deterministic mapping from risk_type. |
+| severity mapping | 严重程度映射 | Severity assignment policy from risk_type/context (current stage: LLM mapper). |
 | fingerprint | 指纹 | Stable ID for dedup/traceability (hash-based). |
 | deduplication | 去重 | Merge risks with same fingerprint or same dedup key. |
 
@@ -58,10 +58,10 @@ Version: v1.0.0-alpha
 |---|---|---|
 | Source of Truth | 单一事实源 | This repo is the only authoritative spec source. |
 | schema | 数据契约/结构定义 | JSON Schema Draft 2020-12 is used. |
-| dict / dictionary | 字典配置 | YAML config for keywords/regex/thresholds/mapping. |
+| dict / dictionary | 字典配置 | Versioned config for keywords/regex/thresholds/mapping (JSON or YAML by module). |
 | spec_version | 规范版本 | Version of spec document governing the module/system. |
 | module_version | 模块版本 | Version of implementation/prompt for a module. |
-| dict_version | 字典版本 | Version of YAML dict used by deterministic modules. |
+| dict_version | 字典版本 | Version of dictionary/config artifact used by modules. |
 | breaking change | 破坏性变更 | Requires MAJOR version bump. |
 
 ---
@@ -71,7 +71,7 @@ Version: v1.0.0-alpha
 - Module names are **English** and stable (no layer numbering).
 - JSON fields and schema keys are **English**.
 - `risk_type` and `block_type` must use `snake_case`.
-- Dictionaries are stored as **YAML** and versioned.
+- Dictionaries/config artifacts are versioned; format may be **JSON** or **YAML** by module.
 - Schemas follow **JSON Schema Draft 2020-12**.
 
 ---
